@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Prefabs/Projectile.meta
+guid: 9d4589332c4be7b4ea9c3a00bb100125
+========
+guid: 5103fc052c69c954f8420a2c83508c42
+>>>>>>>> feat/Restaurant:Assets/Scripts/RandomSpawn.meta
+folderAsset: yes
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
