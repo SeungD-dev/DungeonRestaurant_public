@@ -52,9 +52,9 @@ public class CardDrag : MonoBehaviour , IBeginDragHandler , IDragHandler , IEndD
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        Debug.Log(this.transform.position.y + "현재값");
-        Debug.Log(defaultPos.y + 200f + "목표값");
-        Debug.Log(CombatController.instance.playerCharacters[0].CombatAI.name);
+        //Debug.Log(this.transform.position.y + "현재값");
+        //Debug.Log(defaultPos.y + 200f + "목표값");
+        //Debug.Log(CombatController.instance.playerCharacters[0].CombatAI.name);
         if (transform.position.y >= defaultPos.y + 150f / canvas.scaleFactor && !isEndFever)
         {
             CardEffect_();
@@ -73,8 +73,8 @@ public class CardDrag : MonoBehaviour , IBeginDragHandler , IDragHandler , IEndD
 
     public void CardEffect_()
     {
-        var characterList = CombatController.instance.playerCombatAI;
-        var enemyList = CombatController.instance.enemyCombatAI;
+        var characterList = CombatController.instance.playerCharacters;
+        var enemyList = CombatController.instance.enemyCharacters;
 
         int randomCharacterIdx = Random.Range(0, characterList.Count);
         int randomEnemyIdx = Random.Range(0,enemyList.Count);

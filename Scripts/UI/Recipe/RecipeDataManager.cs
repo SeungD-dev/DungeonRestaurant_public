@@ -71,10 +71,10 @@ public class RecipeDataManager : MonoBehaviour
         {
             Debug.LogError("RecipeInfo assets could not be loaded. Please check the path and ensure there are assets in the specified directory.");
         }
-        else
-        {
-            Debug.Log($"{recipesInfo.Length} RecipeInfo assets loaded successfully.");
-        }
+        //else
+        //{
+        //    Debug.Log($"{recipesInfo.Length} RecipeInfo assets loaded successfully.");
+        //}
     }
 
 

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,7 +7,8 @@ using Sirenix.OdinInspector;
 public enum CurrencyType
 {
     Gold,
-    Medal
+    Medal,
+    RecipePoint
 }
 
 public class Currency : MonoBehaviour

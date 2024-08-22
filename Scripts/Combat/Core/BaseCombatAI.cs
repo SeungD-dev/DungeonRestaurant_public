@@ -148,7 +148,7 @@ public abstract class BaseCombatAI : MonoBehaviour
 
     protected virtual void ApplyCharacterStat() { }
 
-    public virtual void SetBaseInfo()
+    public virtual void SetCharacterInfo()
     {
         InitializeCharacterStat();
         ApplyCharacterStat();
@@ -517,8 +517,8 @@ public abstract class BaseCombatAI : MonoBehaviour
 
     public virtual void ApplyDefenseReduction(float reductionPercentage)
     {
-        float reductionAmount = originalDef * reductionPercentage;
-        Def = Mathf.Max(0, Def - reductionAmount);
+        float reductionAmount = Def * reductionPercentage;
+        Def = reductionAmount;
     }
 
     public virtual void RestoreDefense()

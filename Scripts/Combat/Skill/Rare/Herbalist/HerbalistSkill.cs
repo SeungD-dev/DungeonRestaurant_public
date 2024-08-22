@@ -8,6 +8,7 @@ public class HerbalistSkill : MonoBehaviour
     [SerializeField] private float healInterval = 0.5f;
     [SerializeField] private float healMultiplier = 0.5f;
     [SerializeField] private float attackSpeedIncreasePercent = 0.1f;
+    [SerializeField] private GameObject skillEffect;
     private List<PlayerCombatAI> affectedPlayers = new List<PlayerCombatAI>();
     private Coroutine healRoutine;
     private Herbalist herbalist;
@@ -26,11 +27,12 @@ public class HerbalistSkill : MonoBehaviour
     {
         this.herbalist = herbalist;
         StartSkillEffect();
+        herbalist.DisableManaGain();
     }
 
     private void StartSkillEffect()
     {
-        healRoutine = StartCoroutine(HealAndBuffRoutine());
+        healRoutine = StartCoroutine(HealRoutine());
     }
 
     private void OnDisable()
@@ -45,6 +47,7 @@ public class HerbalistSkill : MonoBehaviour
             StopCoroutine(healRoutine);
         }
         ResetBuffs();
+        herbalist.EnableManaGain();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -62,12 +65,12 @@ public class HerbalistSkill : MonoBehaviour
         PlayerCombatAI player = other.GetComponent<PlayerCombatAI>();
         if (player != null && affectedPlayers.Contains(player))
         {
-            affectedPlayers.Remove(player);
             RemoveAttackSpeedBuff(player);
+            affectedPlayers.Remove(player);
         }
     }
 
-    private IEnumerator HealAndBuffRoutine()
+    private IEnumerator HealRoutine()
     {
         while (true)
         {
@@ -82,12 +85,22 @@ public class HerbalistSkill : MonoBehaviour
 
     private void ApplyAttackSpeedBuff(PlayerCombatAI player)
     {
-        player.IncreaseAttackSpeed(attackSpeedIncreasePercent);
+        float originalAttackSpeed = player.AttackSpeed;
+        float increasedAttackSpeed = originalAttackSpeed * (1 + attackSpeedIncreasePercent);
+        player.AttackSpeed = increasedAttackSpeed;
+        player.BaseAttackInterval = 1f / increasedAttackSpeed;
+
+        Vector3 effectPos = player.transform.position;
+        Vector3 offset = effectPos - player.transform.position;
+        offset.y += 2f;
+        EffectManager.Instance.PlayFollowingAnimatedSpriteEffect(skillEffect, player.transform, offset, false);
     }
 
     private void RemoveAttackSpeedBuff(PlayerCombatAI player)
     {
-        player.DecreaseAttackSpeed(attackSpeedIncreasePercent);
+        float originalAttackSpeed = player.AttackSpeed / (1 + attackSpeedIncreasePercent);
+        player.AttackSpeed = originalAttackSpeed;
+        player.BaseAttackInterval = 1f / originalAttackSpeed;
     }
 
     private void ResetBuffs()

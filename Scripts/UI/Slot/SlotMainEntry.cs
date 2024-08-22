@@ -1,4 +1,5 @@
 using Sirenix.OdinInspector;
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -9,8 +10,11 @@ public class SlotMainEntry : EntrySlotBase, IBeginDragHandler, IDragHandler, IEn
     [SerializeField] private GameObject emptyImage;
     private DragSlotMainEntry dragSlot;
 
-    [ShowInInspector] public int SubEntryIndex { get; set; }
+    [ShowInInspector, PropertyOrder(-1)] public int SubEntryIndex { get; set; } = -1;
 
+
+    public delegate void SlotUpdateEventHandler(int id, int index);
+    public event SlotUpdateEventHandler OnSlotUpdate;
 
     protected override void Awake()
     {
@@ -31,6 +35,14 @@ public class SlotMainEntry : EntrySlotBase, IBeginDragHandler, IDragHandler, IEn
             unRegisterButton.SetActive(false);
             emptyImage.SetActive(true);
         }
+    }
+
+    public void SetDataInSlot(CharacterData data, int index)
+    {
+        CharacterData = data;
+        SubEntryIndex = index;
+        int ID = data != null ? data.ID : -1;
+        OnSlotUpdate?.Invoke(ID, SubEntryIndex);
     }
 
     public void OnUnRegisterButton()

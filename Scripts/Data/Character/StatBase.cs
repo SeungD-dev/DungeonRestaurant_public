@@ -24,6 +24,6 @@ public class StatBase
 
     [SerializeField] protected float criticalPercent;
     public float CriticalPercent { get { return criticalPercent; } set { criticalPercent = value; } }
-    [SerializeField] protected float criticalDamege;
-    public float CriticalDamage { get { return criticalDamege; } set { criticalDamege = value; } }
+    [SerializeField] protected float criticalDamage;
+    public float CriticalDamage { get { return criticalDamage; } set { criticalDamage = value; } }
 }

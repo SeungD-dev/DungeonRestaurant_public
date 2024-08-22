@@ -66,7 +66,7 @@ public class CaptainSlime : EnemyCombatAI
 
     public override void Attack()
     {
-        // 공격 로직 (필요한 경우)
+
     }
 
     public override void UseSkill()
@@ -87,17 +87,10 @@ public class CaptainSlime : EnemyCombatAI
         {
             Vector2 spawnPosition = (Vector2)transform.position + Random.insideUnitCircle * 2f;
             GameObject soldierObject = Instantiate(slimeSoliderInfo.Prefab.prefab, spawnPosition, Quaternion.identity);
-            Enemy SpawnedSlime = soldierObject.GetComponent<Enemy>();
-            SpawnedSlime.Info = slimeSoliderInfo;
+            EnemyCombatAI SpawnedSlime = soldierObject.GetComponent<EnemyCombatAI>();
+            SpawnedSlime.SetEnemyData(slimeSoliderInfo);
 
             GameManager.Instance.combatController.EnemyAliveCount++;
-
-            //SlimeSoldier soldier = soldierObject.GetComponent<SlimeSoldier>();
-            //if (soldier != null)
-            //{
-            //    soldier.Initialize();
-            //    GameManager.Instance.combatController.EnemyAliveCount++;
-            //}
         }
     }
 
@@ -130,7 +123,7 @@ public class CaptainSlime : EnemyCombatAI
         Vector2 cameraMax = mainCamera.ViewportToWorldPoint(new Vector3(1, 1, mainCamera.nearClipPlane));
 
         // 캐릭터의 크기를 고려한 여유 공간 (필요에 따라 조정)
-        float buffer = 4f;
+        float buffer = 3f;
 
         position.x = Mathf.Clamp(position.x, cameraMin.x + buffer, cameraMax.x - buffer);
         position.y = Mathf.Clamp(position.y, cameraMin.y + buffer, cameraMax.y - buffer);

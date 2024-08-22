@@ -11,6 +11,7 @@ public class RestaurantUpgradeButton : MonoBehaviour
         if (!DataManager.Instance.userInfo.isUserTutorials && ToturialsManager.Instance.phase == 25)
         {
             ToturialsManager.Instance.isClear[9] = true;
+            ToturialsManager.Instance.OnNextPhase();
         }
         if (restaurantUpgrade.activeSelf == true)
         {

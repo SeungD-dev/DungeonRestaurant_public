@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class EntrySlotBase : MonoBehaviour, IDataChangeHandler
 {
     [Title("Character Data")]
-    [SerializeField] private CharacterData characterData;
+    [SerializeField] protected CharacterData characterData;
     public CharacterData CharacterData
     {
         get { return characterData; }
@@ -18,6 +18,7 @@ public class EntrySlotBase : MonoBehaviour, IDataChangeHandler
 
     public event DataChangeEventHandler OnDataChange;
     [ShowInInspector] public int Index { get; set; }
+
 
 
     [Title("UI")]

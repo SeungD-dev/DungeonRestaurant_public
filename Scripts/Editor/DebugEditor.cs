@@ -192,19 +192,52 @@ public class DebugEditor : OdinEditorWindow
     }
     #endregion
 
-    #region Dungeon
-    [BoxGroup("Dungeon")]
+    #region RecipePoint
+
+    [BoxGroup("RecipePoint")]
     [ReadOnly]
-    [ShowInInspector]
-    private DungeonInfo currentDungeon;
+    [SerializeField]
+    private int currentRecipePoint;
 
     [OnInspectorGUI]
     [DisableInEditorMode]
-    private void LoadCurrentDungeon()
+    private void LoadcurrentRecipePoint()
     {
-        currentDungeon = DataManager.Instance.dungeonList.CurrentDungeon;
+        currentRecipePoint = UserInfo.userInfo.RecipePoint;
     }
 
+
+    [BoxGroup("RecipePoint")]
+    [HorizontalGroup("RecipePoint/Row1")]
+    [PropertyOrder(1)]
+    [DisableInEditorMode]
+    [Button("-", ButtonSizes.Small)]
+    public void DecreaseRecipePoint()
+    {
+        UserInfo.userInfo.RecipePoint -= recipePoint;
+    }
+
+
+    [BoxGroup("RecipePoint")]
+    [HorizontalGroup("RecipePoint/Row1")]
+    [PropertyOrder(2)]
+    [DisableInEditorMode]
+    [HideLabel]
+    public int recipePoint = 1;
+
+
+    [BoxGroup("RecipePoint")]
+    [HorizontalGroup("RecipePoint/Row1")]
+    [PropertyOrder(3)]
+    [DisableInEditorMode]
+    [Button("+", ButtonSizes.Small)]
+    public void IncreaseRecipePoint()
+    {
+        UserInfo.userInfo.RecipePoint += recipePoint;
+    }
+    #endregion
+
+    #region Dungeon
     [BoxGroup("Dungeon")]
     [DisableInEditorMode]
     [Button("Next Dungeon")]
@@ -221,6 +254,17 @@ public class DebugEditor : OdinEditorWindow
         DataManager.Instance.dungeonList.BeforeDungeon();
     }
 
+    //[BoxGroup("Dungeon")]
+    //[ReadOnly]
+    //[ShowInInspector]
+    //private DungeonInfo currentDungeon;
+
+    //[OnInspectorGUI]
+    //[DisableInEditorMode]
+    //private void LoadCurrentDungeon()
+    //{
+    //    currentDungeon = DataManager.Instance.dungeonList.CurrentDungeon;
+    //}
     #endregion
 
 }

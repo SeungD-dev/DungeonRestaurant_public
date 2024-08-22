@@ -1,8 +1,11 @@
 using Sirenix.OdinInspector;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using System.Linq;
 
 public class ToturialsManager : Singleton<ToturialsManager>
 {
@@ -23,7 +26,6 @@ public class ToturialsManager : Singleton<ToturialsManager>
     public bool[] isClear;
     public bool isTutorials = false;
 
-
     [Title("Tutorials Phase")]
     public int phase = 0;
     private float lastClickTime;
@@ -31,9 +33,27 @@ public class ToturialsManager : Singleton<ToturialsManager>
     private readonly Dictionary<int, int> phasePositions = new Dictionary<int, int>
     {
         {3, 0}, {5, 1}, {6, 2}, {7, 3}, {9, 4}, {10, 5},
-        {13, 6}, {14, 7}, {15, 8}, {17, 9}, {18, 10}, {19, 11},
-        {20, 12}, {21, 13}, {23, 14}, {24, 15}, {25, 16}, {26, 17},
-        {27, 18}, {28, 19}, {30, 20}, {31, 21}, {33, 22}, {34, 22}
+        {13, 6},  {18, 10}, {19, 11},
+        {20, 12}, {21, 13}, {23, 14}, {24, 15}, {25, 16},
+        {28, 19}, {30, 20}, {31, 21}, {33, 22}, {34, 22}
+    };
+
+    private readonly Dictionary<int, List<string>> phaseButtonNames = new Dictionary<int, List<string>>
+    {
+        { 3, new List<string> { "EmployBtn" } },
+        { 5, new List<string> { "Employment Button_1" } },
+        { 6, new List<string> { "BackBtn"} },
+        { 7, new List<string> { "EnterDungeonButton" } },
+        { 10, new List<string>{ "EnterDungeonButton" } },
+        { 13, new List<string>{ "StartCombatButton" } },
+        { 21, new List<string>{ "Button_Home" } },
+        { 23, new List<string>{ "RecipeBtn" , "BackBtn" } },
+        { 25, new List<string>{ "RestarantUpgradeBtn", "BackBtn" } },
+        { 26, new List<string>{ "BackBtn" } },
+        { 27, new List<string>{ "BackBtn" } },
+        { 29, new List<string>{ "UpgradeBtn", "BackBtn" } },
+        { 30, new List<string>{ "ManagementBtn" , "BackBtn"}},
+        { 35, new List<string>{ "LevelUpBtn" } }
     };
 
     protected override void Awake()
@@ -42,6 +62,7 @@ public class ToturialsManager : Singleton<ToturialsManager>
         InitializeDescriptions();
         InitializeisClear();
         arrow.SetActive(false);
+        SceneManager.sceneLoaded += OnSceneLoaded;
         if (DataManager.Instance?.userInfo?.isUserTutorials ?? true)
         {
             Destroy(gameObject);
@@ -53,9 +74,57 @@ public class ToturialsManager : Singleton<ToturialsManager>
         }
     }
 
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // 씬이 로드될 때 버튼을 불러오는 함수 호출
+        if (!DataManager.Instance.userInfo.isUserTutorials && isTutorials)
+        {
+            FindAllButtonsInScene();
+            ActivateButtonsForCurrentPhase();
+        }
+    }
+
+    private void FindAllButtonsInScene()
+    {
+        // 기존 리스트 초기화
+        allButtons.Clear();
+
+        // 현재 씬에 있는 모든 Button 컴포넌트를 찾습니다.
+        Button[] buttonsInScene = GameObject.FindObjectsOfType<Button>();
+
+        // 리스트에 추가
+        foreach (var button in buttonsInScene)
+        {
+            allButtons.Add(button);
+        }
+
+        Debug.Log($"씬 '{SceneManager.GetActiveScene().name}'에서 {allButtons.Count}개의 버튼을 찾았습니다.");
+    }
+
+    IEnumerator SetPosition()
+    {
+        yield return new WaitForSeconds(0.5f);
+        for (int i = 0; i < setPosition.Length; i++)
+        {
+            if(i == 2 || i == 10)
+            {
+                setPosition[i].transform.position = new Vector3(setPosition[i].transform.position.x, setPosition[i].transform.position.y + 31f, setPosition[i].transform.position.z);
+            }
+            else if (i == 1 || i == 11 || i==12 || i ==13)
+            {
+
+            }
+            else
+            {
+                setPosition[i].transform.position = new Vector3(setPosition[i].transform.position.x, setPosition[i].transform.position.y - 31f, setPosition[i].transform.position.z);
+            }
+           
+        }
+    }
+
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0) && Time.time >= lastClickTime + clickDelay)
+        if (Input.GetMouseButtonDown(0) && Time.time >= lastClickTime + clickDelay && isTutorials)
         {
             OnNextPhase();
             lastClickTime = Time.time;
@@ -76,15 +145,43 @@ public class ToturialsManager : Singleton<ToturialsManager>
             {
                 arrow.SetActive(false);
             }
+            FindAllButtonsInScene();
+            ActivateButtonsForCurrentPhase();
         }
     }
 
-    private void OnNextPhase()
+    private void ActivateButtonsForCurrentPhase()
+    {
+        // 모든 버튼 비활성화
+        foreach (var button in allButtons)
+        {
+            button.interactable = false;
+        }
+
+        // 현재 Phase에 해당하는 버튼들만 활성화
+        if (phaseButtonNames.TryGetValue(phase, out List<string> buttonNames))
+        {
+            foreach (string name in buttonNames)
+            {
+                var buttonToActivate = allButtons.FirstOrDefault(b => b.name == name);
+                if (buttonToActivate != null)
+                {
+                    buttonToActivate.interactable = true;
+                }
+            }
+        }
+    }
+
+    public void OnNextPhase()
     {
         if (phase >= desTxt.Length)
         {
             DataManager.Instance.userInfo.isUserTutorials = true;
             Destroy(gameObject);
+            foreach (var button in allButtons)
+            {
+                button.interactable = true;
+            }
             return;
         }
 
@@ -94,7 +191,7 @@ public class ToturialsManager : Singleton<ToturialsManager>
         }
         if (phase == 18)
         {
-            this.gameObject.SetActive(false); // 초기에는 숨김
+            this.gameObject.SetActive(false);
         }
 
         phase++;
@@ -126,8 +223,10 @@ public class ToturialsManager : Singleton<ToturialsManager>
                 return CheckConditionForPhase24();
             case 25:
                 return CheckConditionForPhase25();
-            case 27:
-                return CheckConditionForPhase27();
+            case 28:
+                return CheckConditionForPhase28();
+            case 29:
+                return CheckConditionForPhase29();
             case 30:
                 return CheckConditionForPhase30();
             case 31:
@@ -232,10 +331,18 @@ public class ToturialsManager : Singleton<ToturialsManager>
         }
         return false;
     }
-
-    private bool CheckConditionForPhase27()
+    private bool CheckConditionForPhase28()
     {
-        if (isClear[11])
+        if (isClear[10])
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private bool CheckConditionForPhase29()
+    {
+        if (DataManager.Instance.UpgradeLevel.entryLevel >= 1)
         {
             return true;
         }
@@ -280,6 +387,7 @@ public class ToturialsManager : Singleton<ToturialsManager>
             objectPosition.SetActive(true);
             ToturialsUI.SetActive(true);
             isTutorials = true;
+            ActivateButtonsForCurrentPhase();
         }
     }
 
@@ -300,9 +408,9 @@ public class ToturialsManager : Singleton<ToturialsManager>
         desTxt[12] = "우측의 목록에서 모험가를 드래그하거나 클릭한 뒤 좌측의 파티 편성 구역에 모험가를 배치해보세요.";
         desTxt[13] = "배치가 완료되었습니다. 파티를 구성하였으니 진짜 던전에 입장할 차례입니다.";//
         desTxt[14] = "던전 안의 몬스터를 잡으면 요리 게이지를 쌓을 수 있습니다.";//
-        desTxt[15] = "요리 게이지를 전부 쌓으면 특별한 효과를 가진 요리 카드를 얻을 수 있습니다.";//
-        desTxt[16] = "요리 카드는 사용하면 특별한 효과를 발동하고 만복도 게이지를 회복합니다.";//
-        desTxt[17] = "만복도 게이지의 상태에 따라 모든 아군이 다양한 효과를 얻습니다. 만복도 게이지가 공복 상태가 되지 않도록 적절한 타이밍에 카드를 사용해야 합니다.";
+        desTxt[15] = "요리 게이지를 쌓으면 식당에서 요리를해 레시피를 강화할수있습니다.";//
+        desTxt[16] = "각각의 캐릭터들은 평타를 때릴때마다 마나가 차오르며 스킬을 사용할수있습니다.";//
+        desTxt[17] = "모든적을 처치하면 웨이브를 돌파하게됩니다.";
         desTxt[18] = "모든 웨이브를 돌파하면 해당 스테이지를 클리어하게 됩니다.";//
         desTxt[19] = "스테이지를 클리어하면 골드와 재료, 메달을 획득할 수 있습니다. 스테이지에서 패배하더라도 골드와 재료를 획득할 수 있지만, 메달은 승리 시에만 획득할 수 있습니다.";//
         desTxt[20] = "버튼을 눌러 다음 스테이지로 이동하거나 식당으로 복귀할 수 있습니다. ";//
@@ -311,8 +419,8 @@ public class ToturialsManager : Singleton<ToturialsManager>
         desTxt[23] = "던전에서 획득한 요리 재료를 사용해 레시피를 해금하고 강화할 수 있습니다.";//
         desTxt[24] = "레시피 목록에서 현재까지 해금한 요리 목록을 볼 수 있습니다. 또한 레시피를 눌러 조건을 만족한 레시피를 강화할 수 있습니다. 레시피를 강화하면 전투 시 등장하는 요리 카드의 성능과, 손님들의 주문으로 획득하는 골드가 증가합니다.";//
         desTxt[25] = "식당 강화 버튼을 눌러 식당 강화 메뉴를 열 수 있습니다.";//
-        desTxt[26] = "골드 강화 페이지에서는 골드를 사용해 모험가들의 능력치를 강화할 수 있습니다.";//
-        desTxt[27] = "메달 강화 페이지에서는 메달을 사용해 게임 진행에 도움을 주는 특별한 효과를 해금하거나 강화할 수 있습니다.";//
+        desTxt[26] = "스테이지를 클리어하고 얻은 메달로 해당페이지에서 강화 가 가능합니다.";//
+        desTxt[27] = "메달을 사용해 게임 진행에 도움을 주는 특별한 효과를 해금하거나 강화할 수 있습니다.";//
         desTxt[28] = "파티 편성 최대 인원 수를 늘려봅시다.\r\n";//
         desTxt[29] = "메달을 어느정도 사용하면 식당 레벨이 함께 증가합니다. 메달을 더 많이 획득하고 소비해 식당을 업그레이드해보세요.";
         desTxt[30] = "모험가 버튼을 눌러 고용한 모험가 목록을 볼 수 있습니다.";//

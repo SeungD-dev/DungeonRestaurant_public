@@ -107,8 +107,18 @@ public class DataSheetController
         }
         else
         {
-            Debug.LogError("File not found : " + filePath);
-            return null;
+            TextAsset jsonFile = Resources.Load<TextAsset>($"Data/{typeof(T).Name}");
+            if (jsonFile != null)
+            {
+                string json = jsonFile.text;
+                var result = JsonConvert.DeserializeObject<List<T>>(json);
+                return result;
+            }
+            else
+            {
+                Debug.LogError("File not found : " + filePath);
+                return null;
+            }
         }
     }
 

@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 
 public enum UIType
 {
+    IntroUI,
+    RestaurantUI,
     StrategyUI,
     CombatUI,
     CombatResultUI,
@@ -20,9 +22,10 @@ public class UIManager : SerializedMonoBehaviour
 {
     public static UIManager Instance;
 
+    public Camera MainCamera { get; private set; }
+
     [Title("Scene UI Prefab")]
-    [SerializeField] private GameObject dungeonInfoSceneUIPrefab;
-    [SerializeField] private GameObject combatSceneUIPrefab;
+    [SerializeField] private Dictionary<GameState, GameObject> uiPrefabDict = new Dictionary<GameState, GameObject>();
 
     [Title("Popup UI Prefab")]
     [SerializeField] private GameObject goldPopupUIPrefab;
@@ -38,8 +41,8 @@ public class UIManager : SerializedMonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-
             uiDictionary = new Dictionary<UIType, UIBase>();
+            Instantiate(uiPrefabDict[GameState.Intro]);
         }
         else
         {
@@ -48,6 +51,7 @@ public class UIManager : SerializedMonoBehaviour
                 Destroy(gameObject);
             }
         }
+        MainCamera = Camera.main;
     }
 
     private void Start()
@@ -58,26 +62,9 @@ public class UIManager : SerializedMonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
         GameState state = GameManager.Instance.currentGameState;
+        MainCamera = Camera.main;
         uiDictionary.Clear();
-        switch (GameManager.Instance.gameScene[state])
-        {
-            case 0: //IntroScene
-                //Debug.Log("ÀÎÆ®·Î¾À");
-                break;
-            case 1:
-                //Debug.Log("½Ä´ç¾À");
-                break;
-            case 2: //DungeonEnterScene
-                Instantiate(dungeonInfoSceneUIPrefab);
-                SetActiveUI(UIType.DungeonInfoUI, true);
-                break;
-            case 3: // DungeonCombatScene
-                Instantiate(combatSceneUIPrefab);
-                SetActiveUI(UIType.StrategyUI, true);
-                SetActiveUI(UIType.CombatUI, false);
-                SetActiveUI(UIType.CombatResultUI, false);
-                break;
-        }
+        Instantiate(uiPrefabDict[state]);
     }
 
 

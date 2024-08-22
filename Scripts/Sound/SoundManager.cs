@@ -62,7 +62,6 @@ public class SoundManager : Singleton<SoundManager>
         }
 
         activeSFXSources = new List<AudioSource>();
-        LoadSoundBank("IntroSoundBank");
     }
 
     private AudioSource CreateAudioSource(string name)
@@ -85,7 +84,7 @@ public class SoundManager : Singleton<SoundManager>
         }
 
         currentSoundBank = newSoundBank;
-        Debug.Log("Loaded SoundBank: " + soundBankName);    
+        //Debug.Log("Loaded SoundBank: " + soundBankName);    
     }
 
     public void PlaySound(string name, float fadeTime = 1f, bool loop = false)
@@ -216,7 +215,8 @@ public class SoundManager : Singleton<SoundManager>
         foreach (var source in activeSFXSources)
         {
             Sound sound = currentSoundBank.sounds.Find(s => s.clip == source.clip);
-            source.volume = sound.volume * sfxVolume * masterVolume;
+            if (sound != null)
+                source.volume = sound.volume * sfxVolume * masterVolume;
         }
     }
 

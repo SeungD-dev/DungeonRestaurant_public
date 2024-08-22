@@ -67,6 +67,11 @@ public class MedalUpgrade : MonoBehaviour
     public void ShowUpgradeInfo(bool isOn)
     {
         SoundManager.Instance.PlaySound("SFX_UI_Click");
+        if (!DataManager.Instance.userInfo.isUserTutorials && ToturialsManager.Instance.phase == 28)
+        {
+            ToturialsManager.Instance.isClear[10] = true;
+            ToturialsManager.Instance.OnNextPhase();
+        }
         UpgradeInfo.SetActive(true);
         UpdateUI(medalUpgradeType);
 

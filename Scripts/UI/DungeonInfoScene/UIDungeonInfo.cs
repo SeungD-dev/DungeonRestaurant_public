@@ -1,5 +1,4 @@
 using Sirenix.OdinInspector;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -53,6 +52,7 @@ public class UIDungeonInfo : UIBase, IDataChangeHandler
     {
         DataManager.Instance.dungeonList.RemoveCurrentDungeonEvent(LoadCurrentDungeon);
     }
+
 
     private void LoadCurrentDungeon()
     {

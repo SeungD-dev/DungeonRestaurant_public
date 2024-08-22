@@ -4,28 +4,12 @@ using UnityEngine;
 
 public class SlimeSoldier : EnemyCombatAI
 {
-    protected EnemyInfo SlimeData { get; set; } = null;
     private BaseCombatAI forcedTarget;
     private float forcedTargetEndTime;
 
-    protected override void ApplyCharacterStat()
+    public override void SetCharacterInfo()
     {
-        base.ApplyCharacterStat();
-        //Enemy enemy = GetComponent<Enemy>();
-        //SlimeData = enemy.info;
-        MaxHP = SlimeData.HP;
-        CurrentHP = MaxHP;
-        AttackDamage = SlimeData.ATK;
-        MovementSpeed = SlimeData.MoveSpeed;
-        AttackSpeed = SlimeData.AttackSpeed;
-        BaseAttackInterval = 1f / AttackSpeed;
-        AttackRange = SlimeData.Range;
-        Def = SlimeData.DEF;
-    }
-
-    public override void SetBaseInfo()
-    {
-        base.SetBaseInfo();
+        base.SetCharacterInfo();
         Initialize();
     }
 
@@ -44,7 +28,7 @@ public class SlimeSoldier : EnemyCombatAI
     {
         
         var idleState = new IdleState(this);
-        var moveState = new MovingState(this);
+        var moveState = new EnemyMovingState(this);
         var attackState = new EnemyAttackingState(this);
         var stunState = new StunState(this);
         var dieState = new DieState(this);
@@ -80,13 +64,14 @@ public class SlimeSoldier : EnemyCombatAI
     // UpdateNearestTarget 메서드 오버라이드
     public override void UpdateNearestTarget()
     {
-        if (forcedTarget != null)
+        if (forcedTarget != null && forcedTarget.gameObject.activeSelf)
         {
             cachedNearestTarget = forcedTarget;
         }
         else
         {
             base.UpdateNearestTarget();
+            forcedTarget = null;
         }
     }
 

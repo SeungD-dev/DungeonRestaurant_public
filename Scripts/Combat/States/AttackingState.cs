@@ -26,7 +26,6 @@ public class AttackingState : IState
         else
         {
             character.PlayAnimation(AnimationData.IdleHash);
-            Debug.Log("1");
         }
         attackTimer = 0;
     }

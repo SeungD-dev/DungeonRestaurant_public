@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class RecipeButton : MonoBehaviour
@@ -11,6 +12,7 @@ public class RecipeButton : MonoBehaviour
         if (!DataManager.Instance.userInfo.isUserTutorials && ToturialsManager.Instance.phase == 23)
         {
             ToturialsManager.Instance.isClear[7] = true;
+            ToturialsManager.Instance.OnNextPhase();
         }
         if (recipe.activeSelf == true)
         {

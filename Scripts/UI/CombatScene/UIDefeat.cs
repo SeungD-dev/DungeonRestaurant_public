@@ -1,13 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 using TMPro;
+using static UserInfo;
 
 public class UIDefeat : UIBase
 {
-    [SerializeField] private TMP_Text clearGoldText;
+    [SerializeField] private Currency GetGold;
+    [SerializeField] private Currency GetRecipePoint;
 
+    [SerializeField] private TMP_Text clearGoldText;
+    [SerializeField] private TMP_Text clearRecipePointText;
 
     private void OnEnable()
     {
@@ -21,7 +22,7 @@ public class UIDefeat : UIBase
 
     public virtual void SetResultUI()
     {
-        int clearGold = GameManager.Instance.combatController.ClearGold;
-        clearGoldText.text = string.Format("{0:#,##0}", clearGold);
+        GetGold.SetText(GameManager.Instance.combatController.GainGold);
+        GetRecipePoint.SetText(GameManager.Instance.combatController.GainRecipePoint);
     }
 }

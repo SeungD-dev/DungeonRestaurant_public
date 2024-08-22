@@ -39,6 +39,7 @@ public class Management : MonoBehaviour
         if (!DataManager.Instance.userInfo.isUserTutorials && ToturialsManager.Instance.phase == 31)
         {
             ToturialsManager.Instance.isClear[14] = true;
+            ToturialsManager.Instance.OnNextPhase();
         }
         if (isOn)
         {

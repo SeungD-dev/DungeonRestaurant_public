@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Diagnostics;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -38,9 +40,11 @@ public class UIStrategy : UIBase
     #endregion
 
     #region Unity Lifecycle Functions
-
+    Stopwatch timer;
     private void Awake()
     {
+        timer = new Stopwatch();
+        timer.Start();
         Instance = this;
         onEntryCountChange += SetEntryCountText;
         onEntryCountChange += SetTextColor;
@@ -49,12 +53,25 @@ public class UIStrategy : UIBase
 
         maxEntryNumberText.text = stringBuilder.Append(slashString).Append(UserInfo.userInfo.MaxPartyNumber).ToString();
         stringBuilder.Clear();
+
+        StartCoroutine(LoadPreset());
+    }
+
+    IEnumerator LoadPreset()
+    {
+        yield return new WaitUntil(() => (mainEntry.IsInit == true) && (subEntry.IsInit == true));
+
+        LoadEntryPreset(DataManager.Instance.entryPreset);
+
+        timer.Stop();
+        UnityEngine.Debug.Log("Load Time - Party Preset Load : " + timer.ElapsedMilliseconds + " ms");
     }
 
     private void Start()
     {
         UserInfo.userInfo.SetMaxPartyNumberEvent(SetMaxPartyNumberText);
         UserInfo.userInfo.SetMaxPartyNumberEvent(SetTextColor);
+        SetActive(true);
     }
 
     private void OnDestroy()
@@ -101,8 +118,7 @@ public class UIStrategy : UIBase
 
     public void RegisterEntry(SlotMainEntry mainEntrySlot, SlotSubEntry subEntrySlot)
     {
-        mainEntrySlot.CharacterData = subEntrySlot.CharacterData;
-        mainEntrySlot.SubEntryIndex = subEntrySlot.Index;
+        mainEntrySlot.SetDataInSlot(subEntrySlot.CharacterData, subEntrySlot.Index);
         subEntrySlot.OnEntryRegister();
         EntryCount++;
         mainEntrySlot.toggle.isOn = false;
@@ -121,8 +137,7 @@ public class UIStrategy : UIBase
         if (mainEntrySlot.CharacterData == null) return;
         SlotSubEntry subEntrySlot = subEntry.slots[mainEntrySlot.SubEntryIndex];
         subEntrySlot.OnEntryUnRegister();
-        mainEntrySlot.CharacterData = null;
-        mainEntrySlot = null;
+        mainEntrySlot.SetDataInSlot(null, -1);
         EntryCount--;
     }
 
@@ -160,12 +175,27 @@ public class UIStrategy : UIBase
         CharacterData tempData = slot1.CharacterData;
         int tempIndex = slot1.SubEntryIndex;
 
-        slot1.CharacterData = slot2.CharacterData;
-        slot1.SubEntryIndex = slot2.SubEntryIndex;
+        slot1.SetDataInSlot(slot2.CharacterData, slot2.SubEntryIndex);
 
-        slot2.CharacterData = tempData;
-        slot2.SubEntryIndex = tempIndex;
+        slot2.SetDataInSlot(tempData, tempIndex);
     }
+
+    public void LoadEntryPreset(EntryPreset preset)
+    {
+        EmptyEntry();
+
+        for(int i = 0; i < preset.EntryList.Length; i++)
+        {
+            EntryInfo entry = preset.EntryList[i];
+ 
+            int index = entry.GetIndex();
+            if(index == -1) continue;
+            RegisterEntry(mainEntry.slots[i], subEntry.slots[index]);
+
+        }
+    }
+
+
     #endregion
 
     #region Set UI Functions
@@ -210,7 +240,7 @@ public class UIStrategy : UIBase
 
     public void SetButtonInteratable()
     {
-        if(entryCount <= 0) startButton.interactable = false;
+        if (entryCount <= 0) startButton.interactable = false;
         else startButton.interactable = true;
     }
     #endregion
@@ -224,6 +254,7 @@ public class UIStrategy : UIBase
             if (!DataManager.Instance.userInfo.isUserTutorials && ToturialsManager.Instance.phase == 13)
             {
                 ToturialsManager.Instance.isClear[5] = true;
+                ToturialsManager.Instance.OnNextPhase();
             }
             GameManager.Instance.combatController.SetEntry(mainEntry.slots);
             GameManager.Instance.CombatStart();

@@ -2,7 +2,6 @@ using Sirenix.OdinInspector;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -15,8 +14,7 @@ public class CombatController : SerializedMonoBehaviour
 
     [Title("Player")]
     [SerializeField] private CharacterData[] entry;
-    [SerializeField] public Character[] playerCharacters;
-    [SerializeField] public List<PlayerCombatAI> playerCombatAI;
+    [SerializeField] public List<PlayerCombatAI> playerCharacters;
     private int[] playerSpawnIndex;
     private int entryCount = 0;
     private int playerDataLoadCount = 0;
@@ -41,8 +39,7 @@ public class CombatController : SerializedMonoBehaviour
     }
 
     [Title("Enemy")]
-    [SerializeField] public List<Enemy> enemyCharacters;
-    [SerializeField] public List<EnemyCombatAI> enemyCombatAI;
+    [SerializeField] public List<EnemyCombatAI> enemyCharacters;
     [SerializeField] private int enemyAliveCount = 0;
     public int EnemyAliveCount
     {
@@ -61,13 +58,15 @@ public class CombatController : SerializedMonoBehaviour
     private int maxWave;
     private float time;
     private float waveTime;
-    public int ClearGold { get; set; }
+    public int GainGold { get; set; }
+    public int GainRecipePoint {  get; set; }
     [SerializeField] private int killCount = 0;
     [SerializeField] private int killGold = 100;
+    [SerializeField] private int killRecipePoint = 1;
 
     [Title("SpawnPosition")]
     [SerializeField] private Transform[] playerSpawnPosition = new Transform[GameManager.MAX_POSITION];
-    [SerializeField] private Dictionary<SpawnArea, EnemySpawnArea> enemySpawnArea = new Dictionary<SpawnArea, EnemySpawnArea>();
+    [SerializeField] public Dictionary<SpawnArea, EnemySpawnArea> enemySpawnArea = new Dictionary<SpawnArea, EnemySpawnArea>();
 
     [Title("UI")]
     public TMP_Text timeText;
@@ -80,6 +79,19 @@ public class CombatController : SerializedMonoBehaviour
 
     [Title("Camera Settings")]
     [SerializeField] private float cameraMoveDistance = 10f;
+    [Title("TileMap")]
+    private List<GameObject> instantiatedTileMaps = new List<GameObject>();
+
+    private readonly Vector3[] tileMapPositions = new Vector3[]
+    {
+        new Vector3(4.8f, 3.63479f, 0f),
+        new Vector3(-102.2f, 3.63479f, 0f),
+        new Vector3(-31.9f, 3.63479f, 0f),
+        new Vector3(41f, 3.63479f, 0f),
+        new Vector3(77.6f, 3.63479f, 0f),
+        new Vector3(113.7f, 3.63479f, 0f),
+        new Vector3(-68.21f, 3.63479f, 0f)
+    };
 
     public bool isPlayerWin { get; private set; }
     #endregion
@@ -92,10 +104,12 @@ public class CombatController : SerializedMonoBehaviour
         instance = this;
         GameManager.Instance.combatController = this;
         entry = new CharacterData[GameManager.MAX_PARTY_NUMBER];
-        playerCharacters = new Character[GameManager.MAX_PARTY_NUMBER];
+        playerCharacters = new List<PlayerCombatAI>();
         playerSpawnIndex = new int[GameManager.MAX_PARTY_NUMBER];
 
         SetDungeonData();
+
+        InstantiateTileMap();
 
         StartCoroutine(SetCombatUI());
     }
@@ -106,6 +120,7 @@ public class CombatController : SerializedMonoBehaviour
     }
     private void OnDestroy()
     {
+        instance = null;
         GameManager.Instance.combatController = null;
     }
 
@@ -139,6 +154,18 @@ public class CombatController : SerializedMonoBehaviour
         currentWave = 0;
     }
 
+    private void InstantiateTileMap()
+    {
+        GameObject tilemap = DataManager.Instance.DungeonThemeList.GetCombatTileMap(CurrentDungeon.Theme);
+
+        foreach(Vector3 position in tileMapPositions)
+        {
+            GameObject tileMapInstance = Instantiate(tilemap, position, Quaternion.identity);
+            tileMapInstance.transform.SetParent(transform);
+            instantiatedTileMaps.Add(tilemap);
+        }
+    }
+
     public void SetEntry(List<SlotMainEntry> mainEntry)
     {
         int idx = 0;
@@ -161,7 +188,7 @@ public class CombatController : SerializedMonoBehaviour
         sb.Append(currentWave + 1);
         sb.Append(waveString);
         waveText.text = sb.ToString();
-        progressBar.value = currentWave;
+        progressBar.value = currentWave + 1;
     }
 
     #endregion
@@ -206,18 +233,18 @@ public class CombatController : SerializedMonoBehaviour
             if (entry[i] != null)
             {
                 GameObject obj;
-                Character ch;
+                PlayerCombatAI player;
                 int spawnIndex = playerSpawnIndex[i];
                 obj = Instantiate(entry[i].skin.prefab, playerSpawnPosition[spawnIndex].position, Quaternion.identity);
-                ch = obj.GetComponent<Character>();
-                ch.data = entry[i];
-                playerCharacters[i] = ch;
+                player = obj.GetComponent<PlayerCombatAI>();
+                player.SetPlayerData(entry[i]);
+                playerCharacters.Add(player);
                 playerAliveCount++;
             }
         }
     }
 
-    public void SpawnEnemyCharacter(int wave)
+    public void SpawnEnemiesInWave(int wave)
     {
         WaveData waveData = CurrentDungeon.GetWaveData(wave);
 
@@ -232,21 +259,24 @@ public class CombatController : SerializedMonoBehaviour
 
                 foreach (EnemyInfo enemyInfo in enemyList)
                 {
-                    Enemy enemy;
-                    GameObject obj;
-
                     Vector2 spawnPosition = spawnArea.GetRandomPosition();
-
-                    obj = Instantiate(enemyInfo.Prefab.prefab, spawnPosition, Quaternion.identity);
-                    enemy = obj.GetComponent<Enemy>();
-                    enemy.Info = enemyInfo;
-                    enemyCharacters.Add(enemy);
-                    enemyAliveCount++;
+                    SpawnEnemy(enemyInfo, spawnPosition);
                 }
             }
         }
     }
 
+    private void SpawnEnemy(EnemyInfo enemyInfo, Vector2 spawnPosition)
+    {
+        EnemyCombatAI enemy;
+        GameObject obj;
+
+        obj = Instantiate(enemyInfo.Prefab.prefab, spawnPosition, Quaternion.identity);
+        enemy = obj.GetComponent<EnemyCombatAI>();
+        enemy.SetEnemyData(enemyInfo);
+        enemyCharacters.Add(enemy);
+        enemyAliveCount++;
+    }
 
 
     void NextWave()
@@ -255,7 +285,7 @@ public class CombatController : SerializedMonoBehaviour
         {
             time = waveTime;
             currentWave++;
-            SpawnEnemyCharacter(currentWave);
+            SpawnEnemiesInWave(currentWave);
             SetWaveProgressUI();
         }
         else
@@ -311,28 +341,18 @@ public class CombatController : SerializedMonoBehaviour
     public void Defeat()
     {
         isPlayerWin = false;
-        StartCoroutine(CombatOver());
+        CombatOver();
     }
 
     public void Victory()
     {
         isPlayerWin = true;
-        progressBar.value = maxWave;
         EmploymentManager.Instance.ReRoll();
-        StartCoroutine(CombatOver());
+        CombatOver();
     }
 
-    private IEnumerator CombatOver()
+    private void CombatOver()
     {
-        yield return new WaitForSeconds(1f);
-        if (isPlayerWin)
-        {
-            SoundManager.Instance.PlaySound("BGM_Victory");
-        }
-        else
-        {
-            SoundManager.Instance.PlaySound("BGM_Defeat");
-        }
         GetClearReward();
         GameManager.Instance.CombatOver();
         CameraController.Instance.ResetCamera();
@@ -340,18 +360,36 @@ public class CombatController : SerializedMonoBehaviour
 
     public void GetClearReward()
     {
-        ClearGold = CurrentDungeon.ClearGold;
+        GetGold();
+        GetMedal();
+        GetRecipePoint();
+    }
+
+    private void GetGold()
+    {
+        GainGold = CurrentDungeon.ClearGold;
+        if (!isPlayerWin)
+        {
+            GainGold = (int)(GainGold * CurrentDungeon.DefeatMultiplier);
+        }
+        GainGold += killCount * killGold;
+        UserInfo.userInfo.Gold += GainGold;
+    }
+
+    private void GetMedal()
+    {
         if (isPlayerWin)
         {
             UserInfo.userInfo.Medal += CurrentDungeon.ClearMedal;
         }
-        else
-        {
-            ClearGold = (int)(ClearGold * CurrentDungeon.DefeatMultiplier);
-        }
-        ClearGold += killCount * killGold;
-        UserInfo.userInfo.Gold += ClearGold;
     }
+
+    private void GetRecipePoint()
+    {
+        GainRecipePoint += killCount * killRecipePoint;
+        UserInfo.userInfo.RecipePoint += GainRecipePoint;
+    }
+
     #endregion
 
 
@@ -361,6 +399,11 @@ public class CombatController : SerializedMonoBehaviour
     {
         Victory();
     }
+    public void Debug_BattleDefeat()
+    {
+        Defeat();
+    }
+
 
     public void Debug_NextWave()
     {
@@ -369,28 +412,36 @@ public class CombatController : SerializedMonoBehaviour
 
     public void Debug_KillAllEnemies()
     {
-        foreach (Enemy enemy in enemyCharacters)
+        foreach (EnemyCombatAI enemy in enemyCharacters)
         {
-            if (enemy.gameObject.activeSelf == true)
+            if (enemy.CheckAlive() == true)
             {
-                BaseCombatAI ai = enemy.gameObject.GetComponent<BaseCombatAI>();
-                ai.Die();
+                enemy.Die();
             }
         }
     }
 
-    public void Debug_SpawnEnemy()
+
+    public void Debug_SpawnEnemiesInWave(int wave)
     {
-        SpawnEnemyCharacter(0);
+        SpawnEnemiesInWave(wave);
+    }
+
+    public void Debug_SpawnEnemy(EnemyInfo info, SpawnArea eSpawnArea)
+    {
+        EnemySpawnArea spawnArea = enemySpawnArea[eSpawnArea];
+        spawnArea.ClearOccupiedPositions();
+        Vector2 spawnPosition = spawnArea.GetRandomPosition();
+        SpawnEnemy(info, spawnPosition);
     }
 
     public void Debug_ResurrectPlayerCharacters()
     {
-        foreach (Character character in playerCharacters)
+        foreach (PlayerCombatAI character in playerCharacters)
         {
             if (character == null) return;
-            if (character.CombatAI.CheckAlive() == false)
-                character.CombatAI.Resurrection(100);
+            if (character.CheckAlive() == false)
+                character.Resurrection(100);
         }
     }
 

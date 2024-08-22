@@ -99,6 +99,6 @@ public class ManageSlotInstance : MonoBehaviour
     public void BackBtn()
     {
         SoundManager.Instance.PlaySound("SFX_UI_Click");
-        Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 }

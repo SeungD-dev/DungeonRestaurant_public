@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Management;
 using UnityEngine;
 
 public class ManagementButton : MonoBehaviour
 {
     public GameObject Management;
+    private GameObject managementInstance;
 
     public void OnClickManagementButton()
     {
@@ -12,7 +14,20 @@ public class ManagementButton : MonoBehaviour
         if (!DataManager.Instance.userInfo.isUserTutorials && ToturialsManager.Instance.phase == 30)
         {
             ToturialsManager.Instance.isClear[13] = true;
+            ToturialsManager.Instance.OnNextPhase();
         }
-        Instantiate(Management);
+
+        if (managementInstance == null)
+        {
+            managementInstance = Instantiate(Management);
+        }
+        else
+        {
+            if (managementInstance.activeSelf == false)
+            {
+                managementInstance.SetActive(true);
+                FindObjectOfType<ManageSlotInstance>().Refresh();
+            }
+        }
     }
 }

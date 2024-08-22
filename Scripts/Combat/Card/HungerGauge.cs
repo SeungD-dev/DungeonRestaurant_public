@@ -90,7 +90,7 @@ public class HungerGauge : MonoBehaviour
                 {
                     if (CardDeck.Instance.cards.Count <= 2f) 
                     {
-                        CardDeck.Instance.Darw();
+                        CardDeck.Instance.Draw();
                         cookingGauge.fillAmount = 0f;
                     }
                     else

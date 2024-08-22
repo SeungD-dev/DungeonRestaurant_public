@@ -22,8 +22,7 @@ public class CardEffect
     {
         for (int i = 0; i < character.Count; i++)
         {
-            //character[i].GainMana(character[i].MaxMana *= 1 + (value / 100));
-            character[i].GainMana(5);
+            character[i].GainMana(value);
         }
     }
 

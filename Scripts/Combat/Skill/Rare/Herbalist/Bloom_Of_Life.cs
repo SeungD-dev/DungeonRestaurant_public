@@ -10,6 +10,7 @@ public class BloomOfLife : BaseSkill
     [SerializeField] private GameObject vfx1Prefab;
     [SerializeField] private float projectileSpeed = 10f;
     [SerializeField] private float skillDuration = 3f;
+    [SerializeField] private float manaGainDisableDuration = 3f;
 
     public override void ExecuteSkill(BaseCombatAI character)
     {
@@ -19,6 +20,7 @@ public class BloomOfLife : BaseSkill
             if (target != null)
             {
                 herbalist.StartCoroutine(LaunchProjectile(herbalist, target));
+                herbalist.StartCoroutine(DisableManaGainTemporarily(herbalist));
             }
         }
     }
@@ -84,5 +86,12 @@ public class BloomOfLife : BaseSkill
             }
         }
         return 1f; // 기본값으로 1초 반환
+    }
+
+    private IEnumerator DisableManaGainTemporarily(Herbalist herbalist)
+    {
+        herbalist.DisableManaGain();
+        yield return new WaitForSeconds(manaGainDisableDuration);
+        herbalist.EnableManaGain();
     }
 }

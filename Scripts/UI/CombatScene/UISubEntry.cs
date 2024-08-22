@@ -1,12 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 
-// TODO :
-// SubEntry(가제) : 플레이어가 보유하고 있는 캐릭터 리스트
 public class UISubEntry : UIEntryBase
 {
     public List<SlotSubEntry> slots;
@@ -26,7 +22,12 @@ public class UISubEntry : UIEntryBase
     protected override void Awake()
     {
         base.Awake();
+        if(!IsInit)
+            Initialize();
+    }
 
+    private void Initialize()
+    {
         int slotIndex = 0;
         foreach (CharacterData data in DataManager.Instance.characterList)
         {
@@ -40,6 +41,7 @@ public class UISubEntry : UIEntryBase
             slot.toggle.group = toggleGroup;
             slots.Add(slot);
         }
+        IsInit = true;
     }
 
     public override void OnToggleValueChanged(bool isOn)

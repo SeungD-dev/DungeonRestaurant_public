@@ -4,6 +4,12 @@ public class UICombatResult : UIBase
 {
     [SerializeField] private UIBase VictoryUI;
     [SerializeField] private UIBase DefeatUI;
+
+    private void Start()
+    {
+        SetActive(false);
+    }
+
     private void OnEnable()
     {
         opened?.Invoke(null);

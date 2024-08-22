@@ -1,5 +1,4 @@
 ﻿using Sirenix.OdinInspector;
-using System.Collections.Generic;
 using UnityEngine;
 
 public enum UpgradeType
@@ -16,19 +15,42 @@ public enum UpgradeType
 [System.Serializable]
 public class CharacterStat : StatBase
 {
-    protected CharacterInfo characterInfo;
+    [Title("Increase Stat Save")]
+    public int increaseHp;
+    public int increaseAtk;
+    public int increaseDef;
+    public int increaseResist;
+    public float increaseAttackSpeed;
+    public float increaseCriticalPercent;
+    public int increaseCriticalDmg;
 
-    public CharacterStat(CharacterInfo info)
-    {
-        characterInfo = info;
-        InitializeStat(info, 1);
-    }
+    public CharacterInfo CharacterInfo { get; set; }
 
     public CharacterStat(CharacterInfo info, int level)
     {
-        characterInfo = info;
+        CharacterInfo = info;
         InitializeStat(info, level);
     }
+
+    public CharacterStat(CharacterStat other)
+    {
+        hp = other.hp;
+        def = other.def;
+        atk = other.atk;
+        resistance = other.resistance;
+        criticalPercent = other.criticalPercent;
+        mp = other.mp;
+        range = other.range;
+        moveSpeed = other.moveSpeed;
+        attackSpeed = other.attackSpeed;
+        criticalDamage = other.criticalDamage;
+    }
+
+    public CharacterStat Clone()
+    {
+        return new CharacterStat(this);
+    }
+
 
     private void InitializeStat(CharacterInfo info, int level)
     {
@@ -43,27 +65,27 @@ public class CharacterStat : StatBase
         range = stat.Range;
         moveSpeed = stat.MoveSpeed;
         attackSpeed = stat.AttackSpeed;
-        criticalDamege = stat.CriticalDamage;
+        criticalDamage = stat.CriticalDamage;
 
         IncreaseStatOnLevelUp(level);
     }
 
     public void IncreaseStatOnLevelUp()
     {
-        IncreaseStat(ref hp, Random.Range(characterInfo.MinHP, characterInfo.MaxHP + 1));
-        IncreaseStat(ref atk, Random.Range(characterInfo.MinATK, characterInfo.MaxATK + 1));
-        IncreaseStat(ref def, Random.Range(characterInfo.MinDEF, characterInfo.MaxDEF + 1));
-        IncreaseStat(ref resistance, Random.Range(characterInfo.MinResistance, characterInfo.MaxResistance + 1));
-        IncreaseStat(ref attackSpeed, Random.Range(characterInfo.MinAttackSpeed, characterInfo.MaxAttackSpeed));
+        IncreaseStat(ref hp, Random.Range(CharacterInfo.MinHP, CharacterInfo.MaxHP + 1));
+        IncreaseStat(ref atk, Random.Range(CharacterInfo.MinATK, CharacterInfo.MaxATK + 1));
+        IncreaseStat(ref def, Random.Range(CharacterInfo.MinDEF, CharacterInfo.MaxDEF + 1));
+        IncreaseStat(ref resistance, Random.Range(CharacterInfo.MinResistance, CharacterInfo.MaxResistance + 1));
+        IncreaseStat(ref attackSpeed, Random.Range(CharacterInfo.MinAttackSpeed, CharacterInfo.MaxAttackSpeed));
     }
 
     private void IncreaseStatOnLevelUp(int level)
     {
-        IncreaseStat(ref hp, Random.Range(characterInfo.MinHP * level, characterInfo.MaxHP * level + 1));
-        IncreaseStat(ref atk, Random.Range(characterInfo.MinATK * level, characterInfo.MaxATK * level + 1));
-        IncreaseStat(ref def, Random.Range(characterInfo.MinDEF * level, characterInfo.MaxDEF * level + 1));
-        IncreaseStat(ref resistance, Random.Range(characterInfo.MinResistance * level, characterInfo.MaxResistance * level + 1));
-        IncreaseStat(ref attackSpeed, Random.Range(characterInfo.MinAttackSpeed * level, characterInfo.MaxAttackSpeed * level));
+        IncreaseStat(ref hp, Random.Range(CharacterInfo.MinHP * level, CharacterInfo.MaxHP * level + 1));
+        IncreaseStat(ref atk, Random.Range(CharacterInfo.MinATK * level, CharacterInfo.MaxATK * level + 1));
+        IncreaseStat(ref def, Random.Range(CharacterInfo.MinDEF * level, CharacterInfo.MaxDEF * level + 1));
+        IncreaseStat(ref resistance, Random.Range(CharacterInfo.MinResistance * level, CharacterInfo.MaxResistance * level + 1));
+        IncreaseStat(ref attackSpeed, Random.Range(CharacterInfo.MinAttackSpeed * level, CharacterInfo.MaxAttackSpeed * level));
     }
 
     public int GetLevel(UpgradeType upgradeType)
@@ -89,7 +111,7 @@ public class CharacterStat : StatBase
             UpgradeType.Def => def,
             UpgradeType.Resist => resistance,
             UpgradeType.Hp => hp,
-            UpgradeType.CriticalDmg => (int)criticalDamege,
+            UpgradeType.CriticalDmg => (int)criticalDamage,
             _ => 0,
         };
     }
@@ -121,7 +143,7 @@ public class CharacterStat : StatBase
                 hp += amount;
                 break;
             case UpgradeType.CriticalDmg:
-                criticalDamege += amount;
+                criticalDamage += amount;
                 break;
         }
     }
@@ -139,11 +161,11 @@ public class CharacterStat : StatBase
         }
     }
 
-    public void IncreaseStat(ref int stat, int amount)
+    private void IncreaseStat(ref int stat, int amount)
     {
         stat += amount;
     }
-    public void IncreaseStat(ref float stat, float amount)
+    private void IncreaseStat(ref float stat, float amount)
     {
         stat += amount;
     }

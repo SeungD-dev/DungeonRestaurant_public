@@ -1,10 +1,6 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 
-// TODO :
-// MainEntry(가제) : 전투 편성 엔트리
 public class UIMainEntry : UIEntryBase
 {
     [SerializeField] public List<SlotMainEntry> slots;
@@ -25,6 +21,13 @@ public class UIMainEntry : UIEntryBase
     {
         base.Awake();
 
+        if (!IsInit)
+            Initialize();
+    }
+
+    private void Initialize()
+    {
+        EntryPreset preset = DataManager.Instance.entryPreset;
         for (int i = 0; i < GameManager.MAX_POSITION; i++)
         {
             GameObject obj;
@@ -32,12 +35,28 @@ public class UIMainEntry : UIEntryBase
             SlotMainEntry slot = obj.GetComponent<SlotMainEntry>();
             slot.CharacterData = null;
             slot.Index = i;
+            slot.OnSlotUpdate += preset.EntryList[i].SetEntry;
             slot.toggle.onValueChanged.AddListener(OnToggleValueChanged);
             slot.toggle.group = toggleGroup;
             slots.Add(slot);
         }
+        IsInit = true;
     }
 
+    private void OnDestroy()
+    {
+        RemoveEntryEvent(DataManager.Instance.entryPreset);
+    }
+
+    public void RemoveEntryEvent(EntryPreset preset)
+    {
+        int i = 0;
+        foreach (var entry in preset.EntryList)
+        {
+            slots[i].OnSlotUpdate -= entry.SetEntry;
+            i++;
+        }
+    }
 
     public override void OnToggleValueChanged(bool isOn)
     {

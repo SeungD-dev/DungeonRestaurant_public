@@ -9,6 +9,8 @@ public class Herbalist : PlayerCombatAI
     private AnimationEventDispatcher animEventDispatcher;
     private Coroutine attackCoroutine;
     private float baseAttackAnimationLength;
+    private bool canGainMana = true;
+
 
     protected override void Awake()
     {
@@ -55,6 +57,7 @@ public class Herbalist : PlayerCombatAI
     {
         currentSkill.ExecuteSkill(this);
         Mana -= currentSkill.manaCost;
+        DisableManaGain();
     }
 
     public override void Attack()
@@ -84,11 +87,24 @@ public class Herbalist : PlayerCombatAI
         if (CheckTarget())
         {
             LaunchProjectile();
-            GainMana(10);
+            if (canGainMana)  // Add this condition
+            {
+                GainMana(10);
+            }
         }
 
 
         yield return new WaitForSeconds(animationDuration * 0.4f);
+    }
+
+    public void DisableManaGain()
+    {
+        canGainMana = false;
+    }
+
+    public void EnableManaGain()
+    {
+        canGainMana = true;
     }
 
     private void LaunchProjectile()

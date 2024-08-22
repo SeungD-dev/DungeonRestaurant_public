@@ -11,6 +11,7 @@ public class EnterCombatSceneButton : MonoBehaviour
         if (!DataManager.Instance.userInfo.isUserTutorials && ToturialsManager.Instance.phase == 10)
         {
             ToturialsManager.Instance.isClear[3] = true;
+            ToturialsManager.Instance.OnNextPhase();
         }
         GameManager.Instance.CombatState();
     }

@@ -95,6 +95,7 @@ public class Recipe : MonoBehaviour
             if (!DataManager.Instance.userInfo.isUserTutorials && ToturialsManager.Instance.phase == 24)
             {
                 ToturialsManager.Instance.isClear[8] = true;
+                ToturialsManager.Instance.OnNextPhase();
             }
             StartCoroutine(ShowDescription(0.5f));
         }

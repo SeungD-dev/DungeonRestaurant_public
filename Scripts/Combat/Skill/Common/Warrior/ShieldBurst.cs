@@ -32,8 +32,6 @@ public class ShieldBurst : BaseSkill
 
     private void ApplyDefenseReduction(BaseCombatAI target)
     {
-        // 여기서는 가정된 방어력 감소 메서드를 호출합니다.
-        // 실제 구현에서는 BaseCombatAI 클래스에 이 메서드를 추가해야 합니다.
         target.StartCoroutine(DefenseReductionCoroutine(target));
     }
 

@@ -1,6 +1,6 @@
 public enum DungeonTheme
 {
     DungeonEntrance,
-    DeepForest,
-    Atlantis
+    CollapsedCastle,
+    ChilledPlain
 }

@@ -66,8 +66,12 @@ public class DungeonDataList
     public void OnClearDungeon()
     {
         currentDungeon.DungeonClear();
-        currentDungeonIndex++;
-        if (currentDungeonIndex >= DungeonList.Count)
+        
+        if (currentDungeonIndex < DungeonList.Count - 1)
+        {
+            currentDungeonIndex++;
+        }
+        else
         {
             Debug.Log("모든 던전을 클리어 했습니다.\n");
             currentDungeonIndex = DungeonList.Count - 1;
@@ -78,9 +82,8 @@ public class DungeonDataList
     public void BeforeDungeon()
     {
         currentDungeon.DungeonClearCancel();
-        currentDungeonIndex--;
-        if (currentDungeonIndex < 0)
-            currentDungeonIndex = 0;
+        if (currentDungeonIndex > 0)
+            currentDungeonIndex--;
         CurrentDungeon = DungeonList[currentDungeonIndex];
     }
 

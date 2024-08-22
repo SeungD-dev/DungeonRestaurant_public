@@ -10,11 +10,32 @@ public abstract class PlayerCombatAI : BaseCombatAI
     [Title("Camera Target")]
     public Transform cameraTarget;
 
+    private float baseAttackSpeed;
+    private float currentAttackSpeedModifier = 0f;
 
     protected override void Awake()
     {
         base.Awake();
         CreateCameraTarget();
+        CharacterSortingManager.Instance.RegisterCharacter(this);
+    }
+
+    private void Start()
+    {
+        team = Team.Ally;
+        StartCoroutine(WaitData());
+    }
+
+    public void SetPlayerData(CharacterData data)
+    {
+        characterData = data;
+    }
+
+    IEnumerator WaitData()
+    {
+        yield return new WaitUntil(() => characterData != null);
+        SetCharacterInfo();
+        InitializedTarget();
     }
 
     private void CreateCameraTarget()
@@ -30,9 +51,6 @@ public abstract class PlayerCombatAI : BaseCombatAI
     protected override void InitializeCharacterStat()
     {
         base.InitializeCharacterStat();
-        Character ch = GetComponent<Character>();
-        characterData = ch.data;
-        CombatController.instance.playerCombatAI.Add(this);
         CameraController.Instance.RegisterPlayerCharacter(this);
     }
 
@@ -45,6 +63,7 @@ public abstract class PlayerCombatAI : BaseCombatAI
         Mana = 0;
         AttackDamage = characterData.Stat.ATK;
         Def = characterData.Stat.DEF;
+        originalDef = Def;
         Resistance = characterData.Stat.Resistance;
         MovementSpeed = characterData.Stat.MoveSpeed;
         AttackSpeed = characterData.Stat.AttackSpeed;
@@ -93,6 +112,7 @@ public abstract class PlayerCombatAI : BaseCombatAI
         base.Die();
         SoundManager.Instance.PlaySound("SFX_Hero_Die");
         CameraController.Instance.UnregisterPlayerCharacter(this);
+        CharacterSortingManager.Instance.UnregisterCharacter(this);
     }
 
     public void IncreaseAttackSpeed(float amount)
@@ -103,6 +123,16 @@ public abstract class PlayerCombatAI : BaseCombatAI
     public void DecreaseAttackSpeed(float amount)
     {
         AttackSpeedDecrease -= amount;
+    }
+
+    public void IncreaseMovementSpeed(float amount)
+    {
+        MovementSpeed += amount;
+    }
+
+    public void DecreaseMovementSpeed(float amount)
+    {
+        MovementSpeed -= amount;
     }
 
     public float GetMovementSpeed()

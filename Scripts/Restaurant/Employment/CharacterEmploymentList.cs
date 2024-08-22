@@ -28,6 +28,7 @@ public class CharacterEmploymentList : MonoBehaviour
         {
             characterEmployments[i].CharacterData = EmploymentManager.Instance.employmentList[i];
             characterEmployments[i].characterEmploymentList = this;
+            UpgradeManager.Instance.StatUpgradeAll(characterEmployments[i].CharacterData.Stat);
             CharacterBackgroundColor(characterEmployments[i]);
             if (!EmploymentManager.Instance.isEmploymentAvailability[i])
             {
@@ -52,6 +53,7 @@ public class CharacterEmploymentList : MonoBehaviour
             for (int i = 0; i < characterEmployments.Length; i++)
             {
                 characterEmployments[i].CharacterData = EmploymentManager.Instance.employmentList[i];
+                UpgradeManager.Instance.StatUpgradeAll(characterEmployments[i].CharacterData.Stat);
                 CharacterBackgroundColor(characterEmployments[i]);
             }
         }

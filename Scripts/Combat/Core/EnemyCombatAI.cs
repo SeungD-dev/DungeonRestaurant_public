@@ -6,35 +6,47 @@ using UnityEngine;
 public abstract class EnemyCombatAI : BaseCombatAI
 {
     [Title("Character Stat")]
-    [SerializeField] protected EnemyInfo enemyInfo;
+    [SerializeField] protected EnemyInfo info;
     public SpriteRenderer pixlmobSprite;
 
-    public void LoadEnemyInfo(EnemyInfo info)
+    private void Start()
     {
-        enemyInfo = info;
+        team = Team.Enemy;
+        StartCoroutine(WaitData());
+    }
+
+    public void SetEnemyData(EnemyInfo info)
+    {
+        this.info = info;
+    }
+
+    IEnumerator WaitData()
+    {
+        yield return new WaitUntil(() => info != null);
+        SetCharacterInfo();
+        InitializedTarget();
     }
 
     protected override void InitializeCharacterStat()
     {
         base.InitializeCharacterStat();
-        CombatController.instance.enemyCombatAI.Add(this);
         pixlmobSprite = GetComponentInChildren<SpriteRenderer>();
     }
 
     protected override void ApplyCharacterStat()
     {
         base.ApplyCharacterStat();
-        MaxHP = enemyInfo.HP;
+        MaxHP = info.HP;
         CurrentHP = MaxHP;
-        MaxMana = enemyInfo.MP;
+        MaxMana = info.MP;
         Mana = 0;
-        AttackDamage = enemyInfo.ATK;
-        Def = enemyInfo.DEF;
-        Resistance = enemyInfo.Resistance;
-        MovementSpeed = enemyInfo.MoveSpeed;
-        AttackSpeed = enemyInfo.AttackSpeed;
+        AttackDamage = info.ATK;
+        Def = info.DEF;
+        Resistance = info.Resistance;
+        MovementSpeed = info.MoveSpeed;
+        AttackSpeed = info.AttackSpeed;
         BaseAttackInterval = 1f / AttackSpeed;
-        AttackRange = enemyInfo.Range;
+        AttackRange = info.Range;
     }
 
     protected override void UpdateFacingDirection()

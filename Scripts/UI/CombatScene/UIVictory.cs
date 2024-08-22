@@ -1,12 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class UIVictory : UIBase
 {
+    [SerializeField] private Currency GetGold;
+    [SerializeField] private Currency GetMedal;
+    [SerializeField] private Currency GetRecipePoint;
+
     [SerializeField] private TMP_Text clearGoldText;
     [SerializeField] private TMP_Text clearMedalText;
+    [SerializeField] private TMP_Text clearRecipePointText;
 
     // TODO : Å¬¸®¾î ½Ã ¾ÆÀÌÅÛ È¹µæ ¸ñ·Ï
     [SerializeField] private Transform itemPanel;
@@ -25,11 +28,9 @@ public class UIVictory : UIBase
 
     public void SetResultUI()
     {
-        int clearGold = GameManager.Instance.combatController.ClearGold;
-        clearGoldText.text = string.Format("{0:#,##0}", clearGold);
-
-        int clearMedal = GameManager.Instance.combatController.CurrentDungeon.ClearMedal;
-        clearMedalText.text = clearMedal.ToString();
+        GetGold.SetText(GameManager.Instance.combatController.GainGold);
+        GetMedal.SetText(GameManager.Instance.combatController.CurrentDungeon.ClearMedal);
+        GetRecipePoint.SetText(GameManager.Instance.combatController.GainRecipePoint);
 
         // TODO : Å¬¸®¾î½Ã È¹µæ ¾ÆÀÌÅÛ ½½·Ô »ý¼º
         //foreach(Item item in ItemList)

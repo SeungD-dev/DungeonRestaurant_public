@@ -60,7 +60,7 @@ public class SwordMaster : PlayerCombatAI
         stateMachine.AddAnyTransition(stunState, new FuncPredicate(() => IsStunned));
         //기본상태
         stateMachine.SetState(idleState);
-        stateMachine.AddAnyTransition(idleState, new FuncPredicate(() => GameManager.Instance.combatController.isPlayerWin));
+        stateMachine.AddAnyTransition(idleState, new FuncPredicate(() => !GameManager.Instance.isCombatStart));
 
     }
 

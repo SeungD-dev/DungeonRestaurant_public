@@ -39,26 +39,15 @@ public class EmploymentManager : Singleton<EmploymentManager>
         isEmploymentAvailability.Clear();
         for (int i = 0; i < GameManager.MAX_PARTY_NUMBER; i++)
         {
-            int random = Random.RandomRange(0,DataManager.Instance.userInfo.UserLevel);
+            int randomLevel = Random.Range(1, DataManager.Instance.userInfo.UserLevel + 1);
             CharacterInfo randomCharacter = CharacterRank();
-            CharacterData character = new CharacterData(randomCharacter);
-            character.characterName = nameList.GetRandomName(character.Info.Rank);
-            if (random == 0) 
-            {
-                character.Level = 1;
-            }
-            while (character.Level <= random)
-            {
-                if (character.Level > 9)
-                {
-                    break;
-                }
-                character.LevelUp();
-            }
+            string characterName = DataManager.Instance.NameList.GetRandomName(randomCharacter.Rank);
+            BaseSkill skill = AssignRandomSkill(randomCharacter.CharacterClass);
+            CharacterPrefab skin = SetSkin(randomCharacter.CharacterClass);
+            CharacterData character = new CharacterData(randomCharacter, randomLevel, characterName, skill, skin);
+
             employmentList.Add(character);
             isEmploymentAvailability.Add(true);
-            AssignRandomSkill(character);
-            SetSkin(character);
         }
     }
 
@@ -67,25 +56,24 @@ public class EmploymentManager : Singleton<EmploymentManager>
         GenerateEmploymentList();
     }
 
-
-    private void AssignRandomSkill(CharacterData character)
+    private BaseSkill AssignRandomSkill(eCharacterClass characterClass)
     {
-        BaseSkill randomSkill = SkillManager.Instance.GetRandomSkill(character.Info.CharacterClass);
-        character.skill = randomSkill;
+        BaseSkill randomSkill = SkillManager.Instance.GetRandomSkill(characterClass);
+        return randomSkill;
     }
 
-    private void SetSkin(CharacterData character)
+    private CharacterPrefab SetSkin(eCharacterClass characterClass)
     {
         CharacterPrefabList[] skinList = DataManager.Instance.PrefabList;
         for (int i = 0; i < skinList.Length; i++)
         {
-            if (skinList[i].characterClass == character.Info.CharacterClass)
+            if (skinList[i].characterClass == characterClass)
             {
                 int randomIdx = Random.Range(0, skinList[i].prefabList.Count);
-                character.skin = skinList[i].prefabList[randomIdx];
-                return;
+                return skinList[i].prefabList[randomIdx];
             }
         }
+        return null;
     }
 
     private CharacterInfo CharacterRank()

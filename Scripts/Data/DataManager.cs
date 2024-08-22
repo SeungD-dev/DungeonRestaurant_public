@@ -1,7 +1,7 @@
 using Sirenix.OdinInspector;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+//using System.Diagnostics;
 using System.IO;
 using UnityEngine;
 using System.Runtime.InteropServices; // Don't erase this namespace!!
@@ -13,11 +13,12 @@ public class SaveData
     public int dungeonClearCount;
     public RestaurantUpgradeLevel UpgradeLevel;
     public List<CharacterDataSerializable> characterList;
+    public EntryPreset entryPreset;
 }
 
 public class DataManager : Singleton<DataManager>
 {
-    private Stopwatch stopwatch = new Stopwatch();
+    //private Stopwatch stopwatch = new Stopwatch();
 
     #region User Data Fields
     [TabGroup("UserInfo")]
@@ -36,6 +37,9 @@ public class DataManager : Singleton<DataManager>
     [TabGroup("RecipeData")]
     [ReadOnly]
     [ShowInInspector] public List<RecipeData> recipeDataList = new List<RecipeData>();
+
+    [TabGroup("EntryPreset")]
+    [SerializeField] public EntryPreset entryPreset = new EntryPreset();
 
     [Title("Save&Load")]
     string saveFilePath;
@@ -59,6 +63,7 @@ public class DataManager : Singleton<DataManager>
     #endregion
 
     #region Data Container Fields
+    private static bool isInit = false;
     public DataSheetController DataSheetController { get; private set; }
 
     private static bool isDataLoaded = false;
@@ -76,10 +81,12 @@ public class DataManager : Singleton<DataManager>
     [TabGroup("PlayerCharacter", "NameList"), ShowInInspector]
     public CharacterNameList NameList { get; set; } = new CharacterNameList();
 
+
     [TabGroup("Enemy", "EnemyInfo"), ShowInInspector]
     public EnemyInfoDict EnemyInfoDict { get; set; } = null;
 
-    [TabGroup("Dungeon","DungeonList")]
+
+    [TabGroup("Dungeon", "DungeonList")]
     public DungeonDataList dungeonList;
     [TabGroup("Dungeon", "DungeonList")]
     public DungeonThemeImageDict DungeonThemeList { get; set; }
@@ -102,17 +109,16 @@ public class DataManager : Singleton<DataManager>
     protected override void Awake()
     {
         base.Awake();
-        saveFilePath = Application.persistentDataPath + "/save.json";
-        stopwatch.Start();
-
+        
+        //stopwatch.Start();
         InitialzeDataContainer();
     }
 
     private void Start()
     {
         LoadData();
-        stopwatch.Stop();
-        UnityEngine.Debug.Log("Resource Loading Time : " + stopwatch.ElapsedMilliseconds + " ms");
+        //stopwatch.Stop();
+        //UnityEngine.Debug.Log("Total Loading Time : " + stopwatch.ElapsedMilliseconds + " ms");
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     CallSaveData();
@@ -127,21 +133,22 @@ public class DataManager : Singleton<DataManager>
     {
         if (isDataLoaded == false)
         {
+            saveFilePath = Application.persistentDataPath + "/save.json";
             DataSheetController = new DataSheetController();
-            Stopwatch stopwatch2 = Stopwatch.StartNew();
+            //Stopwatch stopwatch2 = Stopwatch.StartNew();
             InitializeCharacterData();
-            stopwatch2.Stop();
-            UnityEngine.Debug.Log("캐릭터 데이터 초기화 시간 : " + stopwatch2.ElapsedMilliseconds + " ms");
+            //stopwatch2.Stop();
+            //UnityEngine.Debug.Log("Time - CharacterData : " + stopwatch2.ElapsedMilliseconds + " ms");
 
-            stopwatch2.Restart();
+            //stopwatch2.Restart();
             InitializeEnemyData();
-            stopwatch2.Stop();
-            UnityEngine.Debug.Log("적 데이터 초기화 시간 : " + stopwatch2.ElapsedMilliseconds + " ms");
+            //stopwatch2.Stop();
+            //UnityEngine.Debug.Log("Time - EnemyData : " + stopwatch2.ElapsedMilliseconds + " ms");
 
-            stopwatch2.Restart();
+            //stopwatch2.Restart();
             InitializeDungeonData();
-            stopwatch2.Stop();
-            UnityEngine.Debug.Log("던전 데이터 초기화 시간 : " + stopwatch2.ElapsedMilliseconds + " ms");
+            //stopwatch2.Stop();
+            //UnityEngine.Debug.Log("Time - DungeonData : " + stopwatch2.ElapsedMilliseconds + " ms");
 
             isDataLoaded = true;
         }
@@ -229,7 +236,8 @@ public class DataManager : Singleton<DataManager>
             userInfo = this.userInfo,
             dungeonClearCount = dungeonClearCount,
             UpgradeLevel = this.UpgradeLevel,
-            characterList = serializableCharacterList
+            characterList = serializableCharacterList,
+            entryPreset = this.entryPreset
         };
 
         string json = JsonUtility.ToJson(saveData);
@@ -251,6 +259,7 @@ public class DataManager : Singleton<DataManager>
             dungeonClearCount = saveData.dungeonClearCount;
             dungeonList.LoadClearData(dungeonClearCount);
             this.UpgradeLevel = saveData.UpgradeLevel;
+            this.entryPreset = saveData.entryPreset;
 
             characterList.Clear();
             foreach (CharacterDataSerializable data in saveData.characterList)

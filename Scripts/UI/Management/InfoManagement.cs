@@ -34,17 +34,19 @@ public class InfoManagement : MonoBehaviour
 
     private int requireGold;
 
-    private readonly Dictionary<int, int> levelUpCosts = new Dictionary<int, int>
-    {
-        {1, 1250}, {2, 3750}, {3, 5000}, {4, 6250}, {5, 7500},
-        {6, 8750}, {7, 10000}, {8, 11250}, {9, 12500}
-    };
+    private readonly Dictionary<int, int> levelUpCosts = new Dictionary<int, int>();
 
     private void Awake()
     {
         _camera = Camera.main;
         canvas = GetComponent<Canvas>();
         canvas.worldCamera = _camera;
+
+        for (int level = 1; level <= 30; level++)
+        {
+            int cost = (int)((level + 1) * 1000 * 1.25);
+            levelUpCosts.Add(level, cost);
+        }
     }
 
     private void Start()
@@ -82,24 +84,15 @@ public class InfoManagement : MonoBehaviour
 
     private void UpdateCharacterStats() // 스탯 관련 UI 업데이트
     {
-        var upgradeManager = UpgradeManager.Instance;
+        var statType = characterData.Stat;
 
-        int hpIncrease = upgradeManager.GetLastIncreaseAmount(characterData, UpgradeType.Hp);
-        int atkIncrease = upgradeManager.GetLastIncreaseAmount(characterData, UpgradeType.Atk);
-        int defIncrease = upgradeManager.GetLastIncreaseAmount(characterData, UpgradeType.Def);
-        int resistIncrease = upgradeManager.GetLastIncreaseAmount(characterData, UpgradeType.Resist);
-        float attackSpeedIncrease = upgradeManager.GetLastIncreaseAmountFloat(characterData, UpgradeType.AttackSpeed);
-        float criticalPercentIncrease = upgradeManager.GetLastIncreaseAmountFloat(characterData, UpgradeType.CriticalPercent);
-        int criticalDmgIncrease = upgradeManager.GetLastIncreaseAmount(characterData, UpgradeType.CriticalDmg);
-
-
-        stat.text = $"{characterData.Stat.HP} <color=green>(+{hpIncrease})</color>\n" +
-                    $"{characterData.Stat.ATK} <color=green>(+{atkIncrease})</color>\n" +
-                    $"{characterData.Stat.DEF} <color=green>(+{defIncrease})</color>\n" +
-                    $"{characterData.Stat.Resistance} <color=green>(+{resistIncrease})</color>\n" +
-                    $"{characterData.Stat.AttackSpeed:F2} <color=green>(+{attackSpeedIncrease:F2})</color>\n" +
-                    $"{characterData.Stat.CriticalPercent * 100}% <color=green>(+{criticalPercentIncrease * 100}%)</color>\n" +
-                    $"{characterData.Stat.CriticalDamage}% <color=green>(+{criticalDmgIncrease}%)</color>";
+        stat.text = $"{statType.HP} <color=green>(+{statType.increaseHp})</color>\n" +
+                    $"{statType.ATK} <color=green>(+{statType.increaseAtk})</color>\n" +
+                    $"{statType.DEF} <color=green>(+{statType.increaseDef})</color>\n" +
+                    $"{statType.Resistance} <color=green>(+{statType.increaseResist})</color>\n" +
+                    $"{statType.AttackSpeed:F2} <color=green>(+{statType.increaseAttackSpeed:F2})</color>\n" +
+                    $"{statType.CriticalPercent * 100}% <color=green>(+{statType.increaseCriticalPercent * 100}%)</color>\n" +
+                    $"{statType.CriticalDamage}% <color=green>(+{statType.increaseCriticalDmg}%)</color>";
     }
 
     private void UpdateCharacterInfo() // 캐릭터 정보 업데이트
@@ -126,10 +119,10 @@ public class InfoManagement : MonoBehaviour
         skillDescription.text = characterData.skill.skillDiscription;
     }
 
-    public void YesLVUp() // 10렙이 되면 버튼 클릭 x
+    public void YesLVUp()
     {
         SoundManager.Instance.PlaySound("SFX_UI_Click");
-        if (characterData.Level <= 9 && characterData.Level < UserInfo.userInfo.UserLevel)
+        if (characterData.Level <= levelUpCosts.Count && characterData.Level < UserInfo.userInfo.UserLevel)
         {
             if (levelUpCosts.TryGetValue(characterData.Level, out requireGold))
             {
@@ -145,12 +138,12 @@ public class InfoManagement : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("돈이 부족합니다..");
+                    Debug.Log("Not Enough Money.");
                 }
             }
             else
             {
-                Debug.Log("Max레벨 입니다.");
+                Debug.Log("Max Level.");
             }
         }
         else
@@ -167,12 +160,20 @@ public class InfoManagement : MonoBehaviour
 
     private void LevelUpUpdateUI()
     {
-        level.text = $"LV. {characterData.Level}";
+        if (characterData.Level >= levelUpCosts.Count)
+        {
+            level.text = $"LV. {characterData.Level}";
+            needGold.text = $"최대 레벨";
+        }
+        else
+        {
+            level.text = $"LV. {characterData.Level}";
 
-        levelUpCosts.TryGetValue(characterData.Level, out requireGold);
-        float discount = UpgradeManager.Instance.GetCharacterLevelUpPriceDiscount();
-        int discountedPrice = Mathf.RoundToInt(requireGold * (1 - discount));
-        needGold.text = discountedPrice.ToString();
+            levelUpCosts.TryGetValue(characterData.Level, out requireGold);
+            float discount = UpgradeManager.Instance.GetCharacterLevelUpPriceDiscount();
+            int discountedPrice = Mathf.RoundToInt(requireGold * (1 - discount));
+            needGold.text = discountedPrice.ToString();
+        }
     }
 
     public void FireBtn()

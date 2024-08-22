@@ -5,6 +5,8 @@ using UnityEngine;
 public class StatInfo : ScriptableObject
 {
     public string statName;
+    public string recipeName;
+    public Sprite recipeImage;
     public int maxLevel;
-    public List<int> needGold;
+    public List<int> needRecipePoint;
 }

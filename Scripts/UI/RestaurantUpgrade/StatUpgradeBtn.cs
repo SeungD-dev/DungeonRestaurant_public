@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class StatUpgradeBtn : MonoBehaviour
@@ -22,17 +23,17 @@ public class StatUpgradeBtn : MonoBehaviour
         SoundManager.Instance.PlaySound("SFX_UI_Click");
         int currentLevel = selectedStatInfo.GetCurrentLevel();
         int maxLevel = selectedStatInfo.statInfo.maxLevel;
-        int requiredGold = selectedStatInfo.GetRequiredGold(currentLevel + 1);
+        int requiredGold = selectedStatInfo.GetRequiredRecipePoint(currentLevel + 1);
 
         if (currentLevel >= maxLevel)
         {
-            Debug.Log("최대 레벨");
+            Debug.Log("Max Level");
             return;
         }
 
-        if (UserInfo.userInfo.Gold < requiredGold)
+        if (UserInfo.userInfo.RecipePoint < requiredGold)
         {
-            Debug.Log("돈 부족.");
+            Debug.Log("Not Enough RecipePoint.");
             return;
         }
 
@@ -51,6 +52,7 @@ public class StatUpgradeBtn : MonoBehaviour
                 case UpgradeType.CriticalDmg:
                 case UpgradeType.CriticalPercent:
                     UpgradeManager.Instance.StatUpgradeAllCharacters(upgradeType);
+                    UpgradeManager.Instance.StatUpgradeEmployCharacters(upgradeType);
                     break;
                 default: break;
             }
@@ -62,9 +64,9 @@ public class StatUpgradeBtn : MonoBehaviour
 
     public void UpgradeGold(int amount)
     {
-        if (UserInfo.userInfo.Gold >= amount)
+        if (UserInfo.userInfo.RecipePoint >= amount)
         {
-            UserInfo.userInfo.Gold -= amount;
+            UserInfo.userInfo.RecipePoint -= amount;
         }
     }
 }

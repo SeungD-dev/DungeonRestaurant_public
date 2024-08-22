@@ -1,28 +1,38 @@
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class IntroManager : MonoBehaviour
 {
-    [SerializeField] private Image BGImage;
-    [SerializeField] private Image TitleImage;
-    [SerializeField] private Camera Camera;
+    public static IntroManager Instance;
+
+    public UIIntroScene UIIntroScene { get; set; } = null;
 
     private float introTime = 3f;
 
-    private void Start()
+    private void Awake()
     {
-        StartCoroutine(IntroStart(introTime, BGImage, TitleImage, Camera));
+        Instance = this;
     }
 
-    IEnumerator IntroStart(float time, Image bg, Image title, Camera camera)
+    private void Start()
     {
+        StartCoroutine(IntroStart(introTime));
+    }
+
+    IEnumerator IntroStart(float time)
+    {
+        SoundManager.Instance.LoadSoundBank("IntroSoundBank");
+        yield return new WaitUntil(() => UIIntroScene != null);
+        Image bg = UIIntroScene.BGImage;
+        Image title = UIIntroScene.TitleImage;
+        Camera camera = UIManager.Instance.MainCamera;
+
         Color bgColor = bg.color;
         Color titleColor = title.color;
 
         Vector3 startPosition = camera.transform.position;
-        Vector3 targetPosition = new Vector3(0.2f,-0.9f , camera.transform.position.z);
+        Vector3 targetPosition = new Vector3(0.2f, -0.9f, camera.transform.position.z);
 
         while (bgColor.a > 0.5f)
         {
@@ -30,8 +40,11 @@ public class IntroManager : MonoBehaviour
             bg.color = bgColor;
             yield return null;
         }
+        if (!SoundManager.Instance.IsBGMPlaying("BGM_Intro"))
+        {
+        SoundManager.Instance.PlaySound("BGM_Intro",0.1f);
 
-        SoundManager.Instance.PlaySound("BGM_Intro");
+        }
         while (titleColor.a < 1)
         {
             titleColor.a += Time.deltaTime / time;
@@ -57,7 +70,7 @@ public class IntroManager : MonoBehaviour
             clickable += Time.deltaTime;
             yield return null;
         }
-      
+
         if (!skipIntro)
         {
             yield return new WaitForSeconds(time - clickable);

@@ -1,137 +1,197 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class UpgradeManager : Singleton<UpgradeManager>
 {
-    private Dictionary<CharacterData, Dictionary<UpgradeType, int>> lastIncreaseAmount = new Dictionary<CharacterData, Dictionary<UpgradeType, int>>();
-    private Dictionary<CharacterData, Dictionary<UpgradeType, float>> floatLastIncreaseAmount = new Dictionary<CharacterData, Dictionary<UpgradeType, float>>();
-
     public void StatUpgradeAllCharacters(UpgradeType upgradeType)
     {
         foreach (var character in DataManager.Instance.characterList)
         {
             if (upgradeType == UpgradeType.Atk || upgradeType == UpgradeType.Def || upgradeType == UpgradeType.Hp || upgradeType == UpgradeType.Resist || upgradeType == UpgradeType.CriticalDmg)
-                RemoveLastIncrease(character, upgradeType);
+                RemoveLastIncrease(character.Stat, upgradeType);
             else
-                RemoveLastIncreaseFloat(character, upgradeType);
+                RemoveLastIncreaseFloat(character.Stat, upgradeType);
 
-            UpgradeStatType(character, upgradeType);
+            UpgradeStatType(character.Stat, upgradeType);
         }
     }
 
-    public void UpgradeStatType(CharacterData character, UpgradeType upgradeType)
+    public void StatUpgradeEmployCharacters(UpgradeType upgradeType)
     {
-        if (upgradeType == UpgradeType.Atk || upgradeType == UpgradeType.Def || upgradeType == UpgradeType.Hp) // 공격력, 방어력, 체력
+        foreach (var employCharacter in EmploymentManager.Instance.employmentList)
         {
-            float increasePercentage = character.Stat.GetLevel(upgradeType) * 0.05f;
-            int increaseAmount = Mathf.RoundToInt(character.Stat.GetIntStat(upgradeType) * increasePercentage);
-            character.Stat.IncreaseStat(upgradeType, increaseAmount);
+            if (upgradeType == UpgradeType.Atk || upgradeType == UpgradeType.Def || upgradeType == UpgradeType.Hp || upgradeType == UpgradeType.Resist || upgradeType == UpgradeType.CriticalDmg)
+                RemoveLastIncrease(employCharacter.Stat, upgradeType);
+            else
+                RemoveLastIncreaseFloat(employCharacter.Stat, upgradeType);
 
-            SaveValue(character, upgradeType, increaseAmount);
+            UpgradeStatType(employCharacter.Stat, upgradeType);
+        }
+    }
+
+    public void UpgradeStatType(CharacterStat stat, UpgradeType upgradeType)
+    {
+        if (upgradeType == UpgradeType.Atk || upgradeType == UpgradeType.Def) // 공격력, 방어력
+        {
+            float increasePercentage = stat.GetLevel(upgradeType) * 0.05f;
+            int increaseAmount = Mathf.RoundToInt(stat.GetIntStat(upgradeType) * increasePercentage);
+            stat.IncreaseStat(upgradeType, increaseAmount);
+
+            SaveValue(stat, upgradeType, increaseAmount);
+        }
+        else if (upgradeType == UpgradeType.Hp) // 체력
+        {
+            float increasePercentage = stat.GetLevel(upgradeType) * 0.05f;
+            if (stat.GetLevel(upgradeType) == 9)
+            {
+                increasePercentage = (stat.GetLevel(upgradeType) + 1) * 0.05f;
+            }
+            int increaseAmount = Mathf.RoundToInt(stat.GetIntStat(upgradeType) * increasePercentage);
+            stat.IncreaseStat(upgradeType, increaseAmount);
+
+            SaveValue(stat, upgradeType, increaseAmount);
         }
         else if (upgradeType == UpgradeType.Resist) // 저항
         {
-            int increaseAmount = character.Stat.GetLevel(upgradeType) * 10;
-            character.Stat.IncreaseStat(upgradeType, increaseAmount);
+            int increaseAmount = stat.GetLevel(upgradeType) * 10;
+            stat.IncreaseStat(upgradeType, increaseAmount);
 
-            SaveValue(character, upgradeType, increaseAmount);
+            SaveValue(stat, upgradeType, increaseAmount);
         }
         else if (upgradeType == UpgradeType.CriticalDmg) // 크리 데미지
         {
-            int increaseAmount = character.Stat.GetLevel(upgradeType) * 5;
-            character.Stat.IncreaseStat(upgradeType, increaseAmount);
+            int increaseAmount = stat.GetLevel(upgradeType) * 5;
+            if (stat.GetLevel(upgradeType) == 9)
+            {
+                increaseAmount += 5;
+            }
+            stat.IncreaseStat(upgradeType, increaseAmount);
 
-            SaveValue(character, upgradeType, increaseAmount);
+            SaveValue(stat, upgradeType, increaseAmount);
         }
         else if (upgradeType == UpgradeType.CriticalPercent) // 크리 확률
         {
-            float increaseAmount = character.Stat.GetLevel(upgradeType) * 0.05f;
-            character.Stat.IncreaseStat(upgradeType, increaseAmount);
+            float increaseAmount = stat.GetLevel(upgradeType) * 0.05f;
+            stat.IncreaseStat(upgradeType, increaseAmount);
 
-            SaveValue(character, upgradeType, increaseAmount);
+            SaveValue(stat, upgradeType, increaseAmount);
         }
         else
         {
-            float increasePercentage = character.Stat.GetLevel(upgradeType) * 0.05f;
-            float increaseAmount = Mathf.Round(character.Stat.GetFloatStat(upgradeType) * increasePercentage * 100f) / 100f; // 공격 속도 소수점 두자리로 증가
-            character.Stat.IncreaseStat(upgradeType, increaseAmount);
+            float increasePercentage = stat.GetLevel(upgradeType) * 0.05f;
+            if (stat.GetLevel(upgradeType) == 9)
+            {
+                increasePercentage = (stat.GetLevel(upgradeType) + 1) * 0.05f;
+            }
+            float increaseAmount = Mathf.Round(stat.GetFloatStat(upgradeType) * increasePercentage * 100f) / 100f; // 공격 속도 소수점 두자리로 증가
+            stat.IncreaseStat(upgradeType, increaseAmount);
 
-            SaveValue(character, upgradeType, increaseAmount);
+            SaveValue(stat, upgradeType, increaseAmount);
         }
     }
 
-    public void SaveValue(CharacterData character, UpgradeType upgradeType, int increaseAmount) // 증가한 값을 저장 (int)
+    public void SaveValue(CharacterStat stat, UpgradeType upgradeType, int increaseAmount) // 증가한 값을 저장 (int)
     {
-        if (!lastIncreaseAmount.ContainsKey(character))
-            lastIncreaseAmount[character] = new Dictionary<UpgradeType, int>();
+        //var stat = character.Stat;
 
-        lastIncreaseAmount[character][upgradeType] = increaseAmount;
-    }
-
-    public void SaveValue(CharacterData character, UpgradeType upgradeType, float increaseAmount) // 증가한 값을 저장 (float)
-    {
-        if (!floatLastIncreaseAmount.ContainsKey(character))
-            floatLastIncreaseAmount[character] = new Dictionary<UpgradeType, float>();
-
-        floatLastIncreaseAmount[character][upgradeType] = increaseAmount;
-    }
-
-    public void RemoveLastIncrease(CharacterData character, UpgradeType upgradeType) // 최근 증가한 값을 빼주는 것 (int)
-    {
-        if (lastIncreaseAmount.ContainsKey(character) && lastIncreaseAmount[character].ContainsKey(upgradeType))
+        switch (upgradeType)
         {
-            int lastAmount = lastIncreaseAmount[character][upgradeType];
-            character.Stat.IncreaseStat(upgradeType, -lastAmount);
+            case UpgradeType.Atk:
+                stat.increaseAtk += increaseAmount;
+                break;
+            case UpgradeType.Def:
+                stat.increaseDef += increaseAmount;
+                break;
+            case UpgradeType.Resist:
+                stat.increaseResist += increaseAmount;
+                break;
+            case UpgradeType.Hp:
+                stat.increaseHp += increaseAmount;
+                break;
+            case UpgradeType.CriticalDmg:
+                stat.increaseCriticalDmg += increaseAmount;
+                break;
         }
     }
 
-    public void RemoveLastIncreaseFloat(CharacterData character, UpgradeType upgradeType) // 최근 증가한 값을 빼주는 것 (float)
+    public void SaveValue(CharacterStat stat, UpgradeType upgradeType, float increaseAmount) // 증가한 값을 저장 (float)
     {
-        if (floatLastIncreaseAmount.ContainsKey(character) && floatLastIncreaseAmount[character].ContainsKey(upgradeType))
+        switch (upgradeType)
         {
-            float lastAmount = floatLastIncreaseAmount[character][upgradeType];
-            character.Stat.IncreaseStat(upgradeType, -lastAmount);
+            case UpgradeType.AttackSpeed:
+                stat.increaseAttackSpeed += increaseAmount;
+                break;
+            case UpgradeType.CriticalPercent:
+                stat.increaseCriticalPercent += increaseAmount;
+                break;
         }
     }
 
-    public void RemoveLastIncreaseAll(CharacterData character)
+    public void RemoveLastIncrease(CharacterStat stat, UpgradeType upgradeType) // 최근 증가한 값을 빼주는 것 (int)
     {
-        RemoveLastIncrease(character, UpgradeType.Atk);
-        RemoveLastIncrease(character, UpgradeType.Def);
-        RemoveLastIncrease(character, UpgradeType.Resist);
-        RemoveLastIncrease(character, UpgradeType.Hp);
-        RemoveLastIncreaseFloat(character, UpgradeType.AttackSpeed);
-        RemoveLastIncrease(character, UpgradeType.CriticalDmg);
-        RemoveLastIncreaseFloat(character, UpgradeType.CriticalPercent);
-    }
+        //var stat = character.Stat;
 
-    public void StatUpgradeAll(CharacterData character)
-    {
-        UpgradeStatType(character, UpgradeType.Atk);
-        UpgradeStatType(character, UpgradeType.Def);
-        UpgradeStatType(character, UpgradeType.Resist);
-        UpgradeStatType(character, UpgradeType.Hp);
-        UpgradeStatType(character, UpgradeType.AttackSpeed);
-        UpgradeStatType(character, UpgradeType.CriticalPercent);
-        UpgradeStatType(character, UpgradeType.CriticalDmg);
-    }
-
-    public int GetLastIncreaseAmount(CharacterData character, UpgradeType upgradeType) // int 증가치 저장
-    {
-        if (lastIncreaseAmount.ContainsKey(character) && lastIncreaseAmount[character].ContainsKey(upgradeType))
+        switch (upgradeType)
         {
-            return lastIncreaseAmount[character][upgradeType];
+            case UpgradeType.Atk:
+                stat.IncreaseStat(upgradeType, -stat.increaseAtk);
+                stat.increaseAtk = 0;
+                break;
+            case UpgradeType.Def:
+                stat.IncreaseStat(upgradeType, -stat.increaseDef);
+                stat.increaseDef = 0;
+                break;
+            case UpgradeType.Resist:
+                stat.IncreaseStat(upgradeType, -stat.increaseResist);
+                stat.increaseResist = 0;
+                break;
+            case UpgradeType.Hp:
+                stat.IncreaseStat(upgradeType, -stat.increaseHp);
+                stat.increaseHp = 0;
+                break;
+            case UpgradeType.CriticalDmg:
+                stat.IncreaseStat(upgradeType, -stat.increaseCriticalDmg);
+                stat.increaseCriticalDmg = 0;
+                break;
         }
-        return 0;
     }
 
-    public float GetLastIncreaseAmountFloat(CharacterData character, UpgradeType upgradeType) // float 증가치 저장
+    public void RemoveLastIncreaseFloat(CharacterStat stat, UpgradeType upgradeType) // 최근 증가한 값을 빼주는 것 (float)
     {
-        if (floatLastIncreaseAmount.ContainsKey(character) && floatLastIncreaseAmount[character].ContainsKey(upgradeType))
+        //var stat = character.Stat;
+
+        switch (upgradeType)
         {
-            return floatLastIncreaseAmount[character][upgradeType];
+            case UpgradeType.AttackSpeed:
+                stat.IncreaseStat(upgradeType, -stat.increaseAttackSpeed);
+                stat.increaseAttackSpeed = 0;
+                break;
+            case UpgradeType.CriticalPercent:
+                stat.IncreaseStat(upgradeType, -stat.increaseCriticalPercent);
+                stat.increaseCriticalPercent = 0;
+                break;
         }
-        return 0f;
+    }
+
+    public void RemoveLastIncreaseAll(CharacterStat stat)
+    {
+        RemoveLastIncrease(stat, UpgradeType.Atk);
+        RemoveLastIncrease(stat, UpgradeType.Def);
+        RemoveLastIncrease(stat, UpgradeType.Resist);
+        RemoveLastIncrease(stat, UpgradeType.Hp);
+        RemoveLastIncreaseFloat(stat, UpgradeType.AttackSpeed);
+        RemoveLastIncrease(stat, UpgradeType.CriticalDmg);
+        RemoveLastIncreaseFloat(stat, UpgradeType.CriticalPercent);
+    }
+
+    public void StatUpgradeAll(CharacterStat stat)
+    {
+        UpgradeStatType(stat, UpgradeType.Atk);
+        UpgradeStatType(stat, UpgradeType.Def);
+        UpgradeStatType(stat, UpgradeType.Resist);
+        UpgradeStatType(stat, UpgradeType.Hp);
+        UpgradeStatType(stat, UpgradeType.AttackSpeed);
+        UpgradeStatType(stat, UpgradeType.CriticalPercent);
+        UpgradeStatType(stat, UpgradeType.CriticalDmg);
     }
 
     public void IncreaseStatLevel(UpgradeType upgradeType)
@@ -173,7 +233,7 @@ public class UpgradeManager : Singleton<UpgradeManager>
                 break;
             case MedalUpgradeType.employPrice:
                 DataManager.Instance.UpgradeLevel.employPriceLevel++; // CharacterEmployment.cs에서 값 변환
-                break; 
+                break;
             case MedalUpgradeType.characterLvUpPrice:
                 DataManager.Instance.UpgradeLevel.characterLvUpPriceLevel++; // LevelUp.cs에서 값 변환
                 break;

@@ -72,24 +72,15 @@ public class EmployInfo : MonoBehaviour, IDataChangeHandler
 
     private void UpdateCharacterStats() // 스탯 관련 UI 업데이트
     {
-        var upgradeManager = UpgradeManager.Instance;
+        var statType = characterData.Stat;
 
-        int hpIncrease = upgradeManager.GetLastIncreaseAmount(characterData, UpgradeType.Hp);
-        int atkIncrease = upgradeManager.GetLastIncreaseAmount(characterData, UpgradeType.Atk);
-        int defIncrease = upgradeManager.GetLastIncreaseAmount(characterData, UpgradeType.Def);
-        int resistIncrease = upgradeManager.GetLastIncreaseAmount(characterData, UpgradeType.Resist);
-        float attackSpeedIncrease = upgradeManager.GetLastIncreaseAmountFloat(characterData, UpgradeType.AttackSpeed);
-        float criticalPercentIncrease = upgradeManager.GetLastIncreaseAmountFloat(characterData, UpgradeType.CriticalPercent);
-        int criticalDmgIncrease = upgradeManager.GetLastIncreaseAmount(characterData, UpgradeType.CriticalDmg);
-
-
-        stat.text = $"{characterData.Stat.HP} <color=green>(+{hpIncrease})</color>\n" +
-                    $"{characterData.Stat.ATK} <color=green>(+{atkIncrease})</color>\n" +
-                    $"{characterData.Stat.DEF} <color=green>(+{defIncrease})</color>\n" +
-                    $"{characterData.Stat.Resistance} <color=green>(+{resistIncrease})</color>\n" +
-                    $"{characterData.Stat.AttackSpeed:F2} <color=green>(+{attackSpeedIncrease:F2})</color>\n" +
-                    $"{characterData.Stat.CriticalPercent * 100}% <color=green>(+{criticalPercentIncrease * 100}%)</color>\n" +
-                    $"{characterData.Stat.CriticalDamage}% <color=green>(+{criticalDmgIncrease}%)</color>";
+        stat.text = $"{statType.HP} <color=green>(+{statType.increaseHp})</color>\n" +
+                    $"{statType.ATK} <color=green>(+{statType.increaseAtk})</color>\n" +
+                    $"{statType.DEF} <color=green>(+{statType.increaseDef})</color>\n" +
+                    $"{statType.Resistance} <color=green>(+{statType.increaseResist})</color>\n" +
+                    $"{statType.AttackSpeed:F2} <color=green>(+{statType.increaseAttackSpeed:F2})</color>\n" +
+                    $"{statType.CriticalPercent * 100}% <color=green>(+{statType.increaseCriticalPercent * 100}%)</color>\n" +
+                    $"{statType.CriticalDamage}% <color=green>(+{statType.increaseCriticalDmg}%)</color>";
     }
     private void UpdateCharacterInfo() // 캐릭터 정보 업데이트
     {

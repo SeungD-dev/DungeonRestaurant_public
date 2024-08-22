@@ -2,7 +2,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-//TODO : UIBase 상속하여 활용토록 수정하기?
 public class UIEntryBase : UIBase
 {
     [SerializeField] protected Transform background;
@@ -10,6 +9,8 @@ public class UIEntryBase : UIBase
 
     [SerializeField] protected ToggleGroup toggleGroup;
     [SerializeField] protected Toggle currentActiveToggle;
+
+    public bool IsInit { get; protected set; } = false;
 
     protected virtual void Awake()
     {

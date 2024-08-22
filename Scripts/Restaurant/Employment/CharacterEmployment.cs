@@ -106,8 +106,8 @@ public class CharacterEmployment : MonoBehaviour, IDataChangeHandler
         if (isOn)
         {
             SoundManager.Instance.PlaySound("SFX_UI_Click");
-            UpgradeManager.Instance.RemoveLastIncreaseAll(CharacterData);
-            UpgradeManager.Instance.StatUpgradeAll(CharacterData);
+            UpgradeManager.Instance.RemoveLastIncreaseAll(CharacterData.Stat);
+            UpgradeManager.Instance.StatUpgradeAll(CharacterData.Stat);
             StartCoroutine(SetCharacterInfo(isOn, 1));
         }
     }

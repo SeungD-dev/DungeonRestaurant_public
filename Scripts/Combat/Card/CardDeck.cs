@@ -14,7 +14,6 @@ public class CardDeck : MonoBehaviour
 
     [Title("CombatCharacter")]
     public List<PlayerCombatAI> combatCharacterAIList = new List<PlayerCombatAI>();
-    public Character[] characters;
     public GameObject card;
     public HungerGauge hungerGauge;
 
@@ -28,7 +27,7 @@ public class CardDeck : MonoBehaviour
         recipeInfosCommon = RecipeDataManager.Instance.recipesCommon;
         recipeInfosMagic = RecipeDataManager.Instance.recipesMagic;
         recipeInfosLegend = RecipeDataManager.Instance.recipesLegend;
-        combatCharacterAIList = CombatController.instance.playerCombatAI;
+        combatCharacterAIList = CombatController.instance.playerCharacters;
     }
 
     private void Start()
@@ -44,16 +43,11 @@ public class CardDeck : MonoBehaviour
         {
             Debug.LogError("CombatController instance is null");
         }
-        else
-        {
-            characters = CombatController.instance.playerCharacters;
-            //Debug.Log("Characters initialized");
-        }
 
-        FirstDarw();
+        FirstDraw();
     }
 
-    public void Darw()
+    public void Draw()
     {
         int randomidx;
         do
@@ -113,11 +107,11 @@ public class CardDeck : MonoBehaviour
         SetCardPositions();
     }
 
-    private void FirstDarw()
+    private void FirstDraw()
     {
         for (int i = 0; i < 3; i++)
         {
-            Darw();
+            Draw();
         }
     }
 }

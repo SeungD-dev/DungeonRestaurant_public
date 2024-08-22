@@ -10,6 +10,7 @@ public class DungeonEnterSceneButton : MonoBehaviour
         if (!DataManager.Instance.userInfo.isUserTutorials && ToturialsManager.Instance.phase == 7)
         {
             ToturialsManager.Instance.isClear[2] = true;
+            ToturialsManager.Instance.OnNextPhase();
         }
         GameManager.Instance.DungeonEnterState();
     }

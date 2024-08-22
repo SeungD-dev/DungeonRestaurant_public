@@ -13,7 +13,7 @@ public class BaseCloseRangeEnemy : EnemyCombatAI
     protected override void InitializeStates()
     {
         var idleState = new IdleState(this);
-        var moveState = new MovingState(this);
+        var moveState = new EnemyMovingState(this);
         var attackState = new EnemyAttackingState(this);
         var stunState = new StunState(this);
         var dieState = new DieState(this);
@@ -49,13 +49,14 @@ public class BaseCloseRangeEnemy : EnemyCombatAI
     // UpdateNearestTarget 메서드 오버라이드
     public override void UpdateNearestTarget()
     {
-        if (forcedTarget != null)
+        if (forcedTarget != null && forcedTarget.gameObject.activeSelf)
         {
             cachedNearestTarget = forcedTarget;
         }
         else
         {
             base.UpdateNearestTarget();
+            forcedTarget = null;
         }
     }
 

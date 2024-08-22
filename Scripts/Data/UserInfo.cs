@@ -64,6 +64,17 @@ public class UserInfo
         }
     }
 
+    [SerializeField] private int recipePoint;
+    public int RecipePoint
+    {
+        get => recipePoint;
+        set
+        {
+            recipePoint = value;
+            setRecipePoint?.Invoke(recipePoint);
+        }
+    }
+
     [SerializeField] private int maxPartyNumber = 1;
     public int MaxPartyNumber
     {
@@ -80,7 +91,7 @@ public class UserInfo
 
     public bool isUserTutorials;
 
-    private int[] medalsRequiredForLevelUp = {0, 1, 3, 5, 7, 10 ,15 ,20, 30, 40, 50};
+    private int[] medalsRequiredForLevelUp = { 0, 1, 3, 3, 3, 3, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 10, 10, 10, 10, 10, 20, 20, 20, 20, 20 };
 
     #endregion
 
@@ -96,6 +107,9 @@ public class UserInfo
 
     public delegate void SetMedal(int value);
     private event SetMedal setMedal;
+
+    public delegate void SetRecipePoint(int value);
+    private event SetRecipePoint setRecipePoint;
 
     public delegate void SetMaxPartyNumber(int value);
     private event SetMaxPartyNumber setMaxPartyNumber;
@@ -146,6 +160,18 @@ public class UserInfo
         setMedal -= action;
     }
 
+    public void SetRecipePointEvent(SetRecipePoint action)
+    {
+        Debug.Log("SetRecipePointEvent()");
+        setRecipePoint += action;
+        setRecipePoint.Invoke(recipePoint);
+    }
+
+    public void RemoveRecipePointEvent(SetRecipePoint action)
+    {
+        setRecipePoint -= action;
+    }
+
     public void SetMaxPartyNumberEvent(SetMaxPartyNumber action)
     {
         setMaxPartyNumber += action;
@@ -173,6 +199,7 @@ public class UserInfo
         exp = 0;
         gold = initGold;
         medal = 0;
+        RecipePoint = 0;
         maxPartyNumber = 1;
         maxCharacterListCount = initMaxCharaListCount;
         isUserTutorials = false;
@@ -226,6 +253,11 @@ public class UserInfo
             else
             {
                 MaxExp = int.MaxValue;
+            }
+
+            if (userLevel >= maxLevel)
+            {
+                UserLevel = maxLevel;
             }
         }
 

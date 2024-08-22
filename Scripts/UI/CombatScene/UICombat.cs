@@ -21,6 +21,11 @@ public class UICombat : UIBase
         GameManager.Instance.combatController.stageText = stageText;
     }
 
+    private void Start()
+    {
+        SetActive(false);
+    }
+
     public void PauseButton()
     {
         SoundManager.Instance.PlaySound("SFX_UI_Click");
